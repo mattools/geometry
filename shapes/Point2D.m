@@ -95,7 +95,7 @@ methods
     end
     
     function varargout = draw(obj, varargin)
-        % Draw obj point, eventually specifying the style
+        % Draw this point, eventually specifying the style
         
         h = drawPoint([obj.X obj.Y]);
         if nargin > 1
