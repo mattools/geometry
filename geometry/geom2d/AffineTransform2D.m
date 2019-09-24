@@ -51,6 +51,9 @@ methods (Static)
         obj = AffineTransform2D([cot -sit 0 sit cot 0]);
     end
     
+    function obj = identity()
+        obj = AffineTransform2D([1 0 0   0 1 0]);
+    end
 end
 
 
@@ -68,6 +71,9 @@ methods
         if all(size(coeffs) == 3)
             % convert 3x3 matrix to 1x6 row vector (drop last row)
             coeffs = [coeffs(1,1:3) coeffs(2,1:3)];
+        end
+        if ~all(size(coeffs) == [1 6])
+            error('Requires a 1-by-6 numeric array as input');
         end
     
         obj.Coeffs = coeffs;

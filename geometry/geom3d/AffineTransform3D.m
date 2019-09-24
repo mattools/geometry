@@ -18,9 +18,9 @@ classdef AffineTransform3D < handle
 
 %% Properties
 properties
-    % the coefficients of the transform
+    % The coefficients of the transform, as a 1-by-12 numeric array
     % (initialized to identity)
-    Coeffs = [1 0 0 0 ; 0 1 0 0; 0 0 1 0];
+    Coeffs = [1 0 0 0   0 1 0 0   0 0 1 0];
     
 end % end properties
 
@@ -44,22 +44,29 @@ methods (Static)
          
         obj = AffineTransform3D([1 0 0 dx ; 0 1 0 dy ; 0 0 1 dz; 0 0 0 1]);
     end
+    
+    function obj = identity()
+        obj = AffineTransform3D([1 0 0 0   0 1 0 0   0 0 1 0]);
+    end
 end
 
 
 %% Constructor
 methods
-    function obj = AffineTransform3D(mat)
+    function obj = AffineTransform3D(coeffs)
     % Constructor for AffineTransform3D class
     
         if nargin < 1
-            mat = eye(4);
+            coeffs = eye(4);
         end
-        if ~isnumeric(mat) || any(size(mat) ~= 4)
-            error('requires a 4x4 matrix as input');
+        if isnumeric(coeffs) && all(size(coeffs) == 4)
+            coeffs = [coeffs(1,:) coeffs(2,:) coeffs(3,:)];
+        end
+        if ~(isnumeric(coeffs) && all(size(coeffs) == [1 12]))
+            error('requires 1-by-12 or a 4-by-4 numeric array as input');
         end
     
-        obj.Coeffs = [mat(1,:) mat(2,:) mat(3,:)];
+        obj.Coeffs = coeffs;
     end
     
 end % end constructors
