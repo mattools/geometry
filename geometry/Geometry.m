@@ -26,8 +26,39 @@ methods
 end % end constructors
 
 
-%% Methods
+%% Protected methods for general use
 methods
+    function [ax, obj, style, varargin] = parseDrawOptions(varargin)
+        % Returns the different elements necessary to draw the object
+        %
+        % Usage:
+        % [ax, obj, style, otherOptions] = parseDrawOptions(varargin{:});
+        %
+        
+        % extract handle of axis to draw on
+        arg = varargin{1};
+        if isscalar(arg) && ishandle(arg) && strcmpi(get(arg, 'type'), 'axes')
+            ax = varargin{1};
+            varargin(1) = [];
+        else
+            ax = gca;
+        end
+
+        % parse optional style info
+        style = [];
+        ind = cellfun(@(x)isa(x, 'Style'), varargin);
+        if any(ind)
+            style = varargin{ind};
+            varargin(ind) = [];
+        end
+        
+        % assumes obj is first argument of the remaining ones
+        obj = varargin{1};
+        
+        % update varargin array that can contains additional options
+        varargin(1) = [];
+    end
+    
 end % end methods
 
 %% Serialization methods

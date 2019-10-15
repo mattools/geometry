@@ -34,3 +34,41 @@ circ2 = Circle2D.fromStruct(str);
 assertEqual(testCase, circ2.CenterX, circ.CenterX);
 assertEqual(testCase, circ2.CenterY, circ.CenterY);
 assertEqual(testCase, circ2.Radius, circ.Radius);
+function test_draw_simple(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+circ = Circle2D([5 4], 3);
+
+f = figure;
+h = draw(circ);
+assertTrue(testCase, ishandle(h));
+close(f);
+
+
+function test_draw_drawOptions(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+circ = Circle2D([5 4], 3);
+
+f = figure;
+h = draw(circ, 'Color', 'b', 'LineWidth', 2);
+
+assertTrue(testCase, ishandle(h));
+assertEqual(testCase, h.Color, [0 0 1]);
+assertEqual(testCase, h.LineWidth, 2);
+close(f);
+
+function test_draw_style(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+circ = Circle2D([5 4], 3);
+style = Style('LineColor', 'b', 'LineWidth', 2);
+
+f = figure;
+h = draw(circ, style);
+
+assertTrue(testCase, ishandle(h));
+assertEqual(testCase, h.Color, [0 0 1]);
+assertEqual(testCase, h.LineWidth, 2);
+
+close(f);

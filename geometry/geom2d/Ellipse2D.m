@@ -100,7 +100,7 @@ end
 methods
     function res = transform(obj, transform) %#ok<STOUT>
         % Applies a geometric transform to this geometry
-        error('Transform not implemented for Circles');
+        error('Transform not implemented for Ellipses');
     end
     
     function box = boundingBox(obj)
@@ -110,19 +110,41 @@ methods
         box = Box2D([extX extY]);
     end
     
-    function varargout = draw(obj, varargin)
+    function h = draw(varargin)
         % Draw the current geometry, eventually specifying the style
         
-        h = drawEllipse([obj.CenterX obj.CenterY obj.Radius1 obj.Radius2 obj.Orientation]);
-        if nargin > 1
-            var1 = varargin{1};
-            if isa(var1, 'Style')
-                apply(var1, h);
-            end
+        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        
+        % default drawing argument
+        if isempty(varargin)
+            varargin = 'b-';
+        end
+        
+        % get ellipse parameters
+        xc = obj.CenterX;
+        yc = obj.CenterY;
+        r1 = obj.Radius1;
+        r2 = obj.Radius2;
+        theta = obj.Orientation;
+        
+        % pre-compute trig functions (angles is in degrees)
+        cot = cosd(theta);
+        sit = sind(theta);
+        
+        % compute position of several points along ellipse
+        t = linspace(0, 2*pi, 145);
+        xt = xc + r1 * cos(t) * cot - r2 * sin(t) * sit;
+        yt = yc + r1 * cos(t) * sit + r2 * sin(t) * cot;
+        
+        % stores handle to graphic object
+        hh = plot(ax, xt, yt, varargin{:});
+        
+        if ~isempty(style)
+            apply(style, hh);
         end
         
         if nargout > 0
-            varargout = {h};
+            h = hh;
         end
     end
     

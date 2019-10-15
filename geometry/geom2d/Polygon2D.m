@@ -109,38 +109,82 @@ methods
         box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
     end
     
-    function varargout = draw(obj, varargin)
+    function h = draw(varargin)
         % Draw the current geometry, eventually specifying the style
         
-        if nargin > 1
-            style = varargin{1};
-            if ~isa(style, 'Style')
-                error('Second argument must be a Style');
+        % extract drawing options
+        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        holdState = ishold(ax);
+        hold(ax, 'on');
+
+        % default options
+        fillInside = false;
+        drawContour = true;
+        drawVertices = false;
+        if ~isempty(style)
+            fillInside = style.FillVisible;
+            drawContour  = style.LineVisible;
+            drawVertices = style.MarkerVisible;
+        end
+        
+        % parse some options
+        inds = strcmpi(varargin, 'fillInside');
+        if any(inds)
+            inds = find(inds(1));
+            fillInside = varargin{inds+1};
+            varargin([inds inds+1]) = [];
+        end
+        inds = strcmpi(varargin, 'drawVertices');
+        if any(inds)
+            inds = find(inds(1));
+            drawVertices = varargin{inds+1};
+            varargin([inds inds+1]) = [];
+        end
+        
+        % extract data
+        xdata = obj.Coords(:,1);
+        ydata = obj.Coords(:,2);
+
+        % draw outline
+        h0 = [];
+        if fillInside
+            options = {'LineStyle', 'none'};
+            h0 = fill(ax, xdata, ydata, 'y', options{:});
+            if ~isempty(style)
+                apply(style, h0);
             end
-            
-            % fill interior
-            if style.FillVisible
-                h = fillPolygon(obj.Coords);
-                apply(style, h);
+        end
+        
+        % draw outline
+        h1 = [];
+        if drawContour
+            if isempty(varargin)
+                varargin = {'Color', 'b', 'LineStyle', '-'};
             end
-            
-            % draw outline
-            if style.LineVisible
-                h = drawPolygon(obj.Coords);
-                apply(style, h);
+            h1 = plot(ax, xdata([1:end 1]), ydata([1:end 1]), varargin{:});
+            if ~isempty(style)
+                apply(style, h1);
             end
-            
-            if style.MarkerVisible
-                h = drawPoint(obj.Coords);
-                apply(style, h);
+        end
+        
+        % optionnally draw markers
+        h2 = [];
+        if drawVertices
+            options = {'Marker', 's', 'Color', 'k', 'LineStyle', 'none'};
+            h2 = plot(ax, xdata, ydata, options{:});
+            if ~isempty(style)
+                apply(style, h2);
             end
-            
+        end
+        
+        if holdState
+            hold(ax, 'on');
         else
-            h = drawPolygon(obj.Coords);
+            hold(ax, 'off');
         end
         
         if nargout > 0
-            varargout = {h};
+            h = [h0 h1 h2];
         end
     end
 end

@@ -67,19 +67,27 @@ methods
         box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
     end
     
-    function varargout = draw(obj, varargin)
+    function h = draw(varargin)
         % Draw the current geometry, eventually specifying the style
         
-        h = drawPoint(obj.Coords);
-        if nargin > 1
-            var1 = varargin{1};
-            if isa(var1, 'Style')
-                apply(var1, h);
-            end
+        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        
+        % default drawing argument
+        if isempty(varargin)
+            varargin = 'bo';
+        end
+        
+        % plot line segment
+        xdata = obj.Coords(:,1);
+        ydata = obj.Coords(:,2);
+        hh = plot(ax, xdata, ydata, varargin{:});
+        
+        if ~isempty(style)
+            apply(style, hh);
         end
         
         if nargout > 0
-            varargout = {h};
+            h = hh;
         end
     end
     

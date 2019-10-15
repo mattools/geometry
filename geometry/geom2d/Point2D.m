@@ -94,19 +94,25 @@ methods
         box = Box2D([obj.X obj.X obj.Y obj.Y]);
     end
     
-    function varargout = draw(obj, varargin)
+    function h = draw(varargin)
         % Draw this point, eventually specifying the style
         
-        h = drawPoint([obj.X obj.Y]);
-        if nargin > 1
-            var1 = varargin{1};
-            if isa(var1, 'Style')
-                apply(var1, h);
-            end
+        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        
+        % default drawing argument
+        if isempty(varargin)
+            varargin = 'bo';
+        end
+        
+        % plot line segment
+        hh = plot(ax, obj.X, obj.Y, varargin{:});
+        
+        if ~isempty(style)
+            apply(style, hh);
         end
         
         if nargout > 0
-            varargout = {h};
+            h = hh;
         end
     end
     

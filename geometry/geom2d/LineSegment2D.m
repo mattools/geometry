@@ -72,28 +72,22 @@ methods
         box = Box2D([x y]);
     end
     
-    function varargout = draw(obj, varargin)
+    function h = draw(varargin)
         % Draws the current geometry, eventually specifying the style
 
-        % parse style info
-        style = [];
-        ind = cellfun(@(x)isa(x, 'Style'), varargin);
-        if any(ind)
-            style = varargin{ind};
-            varargin(ind) = [];
-        end
+        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
         
         % plot line segment
         xdata = [obj.P1.X obj.P2.X];
         ydata = [obj.P1.Y obj.P2.Y];
-        h = plot(xdata, ydata, varargin{:});
+        hh = plot(ax, xdata, ydata, varargin{:});
         
         if ~isempty(style)
-            apply(style, h);
+            apply(style, hh);
         end
         
         if nargout > 0
-            varargout = {h};
+            h = hh;
         end
     end
     

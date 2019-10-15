@@ -96,19 +96,25 @@ methods
         box = Box2D([extX extY]);
     end
     
-    function varargout = draw(obj, varargin)
+    function h = draw(varargin)
         % Draw the current geometry, eventually specifying the style
         
-        h = drawCircle([obj.CenterX obj.CenterY obj.Radius]);
-        if nargin > 1
-            var1 = varargin{1};
-            if isa(var1, 'Style')
-                apply(var1, h);
-            end
+        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        
+        % compute a set of coordinates for drawing circle
+        N = 72;
+        t = linspace(0, 2*pi, N+1);
+        xt = obj.CenterX + obj.Radius * cos(t);
+        yt = obj.CenterX + obj.Radius * sin(t);
+        
+        hh = plot(ax, xt, yt, varargin{:});
+        
+        if ~isempty(style)
+            apply(style, hh);
         end
         
         if nargout > 0
-            varargout = {h};
+            h = hh;
         end
     end
     
