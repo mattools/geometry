@@ -83,15 +83,13 @@ methods
         end
     end
     
-    function res = scale(obj, varargin)
+    function res = scale(obj, factor)
         % Returns a scaled version of this geometry
-        factor = varargin{1};
         res = MultiPoint2D(obj.Coords * factor);
     end
     
-    function res = translate(obj, varargin)
+    function res = translate(obj, shift)
         % Returns a translated version of this geometry
-        shift = varargin{1};
         res = MultiPoint2D(bsxfun(@plus, obj.Coords, shift));
     end
     
