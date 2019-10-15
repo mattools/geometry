@@ -117,7 +117,7 @@ methods
         
         % default drawing argument
         if isempty(varargin)
-            varargin = 'b-';
+            varargin = {'b-'};
         end
         
         % get ellipse parameters

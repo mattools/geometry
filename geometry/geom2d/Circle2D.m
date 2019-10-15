@@ -105,7 +105,7 @@ methods
         N = 72;
         t = linspace(0, 2*pi, N+1);
         xt = obj.CenterX + obj.Radius * cos(t);
-        yt = obj.CenterX + obj.Radius * sin(t);
+        yt = obj.CenterY + obj.Radius * sin(t);
         
         hh = plot(ax, xt, yt, varargin{:});
         
