@@ -1,4 +1,4 @@
-classdef LineSegment2D < Geometry2D
+classdef LineSegment2D < Curve2D
 % A line segment defined by its two extremities.
 %
 %   Class LineSegment2D

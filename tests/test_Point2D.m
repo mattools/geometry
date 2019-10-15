@@ -33,3 +33,41 @@ p2 = Point2D.fromStruct(str);
 assertEqual(testCase, 3, p2.X);
 assertEqual(testCase, 4, p2.Y);
 
+
+function test_draw_simple(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+pt = Point2D([20 10]); 
+
+f = figure;
+h = draw(pt);
+assertTrue(testCase, ishandle(h));
+close(f);
+
+
+function test_draw_drawOptions(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+pt = Point2D([20 10]); 
+
+f = figure;
+h = draw(pt, 'Color', 'b', 'Marker', '+');
+assertTrue(testCase, ishandle(h));
+assertEqual(testCase, h.Color, [0 0 1]);
+assertEqual(testCase, h.Marker, '+');
+close(f);
+
+function test_draw_style(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+pt = Point2D([20 10]); 
+style = Style('MarkerVisible', true, 'MarkerColor', 'b', 'MarkerStyle', '+');
+
+f = figure;
+h = draw(pt, style);
+
+assertTrue(testCase, ishandle(h));
+assertEqual(testCase, h.Color, [0 0 1]);
+assertEqual(testCase, h.Marker, '+');
+
+close(f);

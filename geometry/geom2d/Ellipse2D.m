@@ -1,4 +1,4 @@
-classdef Ellipse2D < Geometry2D
+classdef Ellipse2D < Curve2D
 % A planar ellipse.
 %
 %   An ellipse is defined by five parameters:

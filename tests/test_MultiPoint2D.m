@@ -67,7 +67,7 @@ function test_draw_style(testCase) %#ok<*DEFNU>
 
 v = [0 0;1 0;0 1;1 1];
 pts = MultiPoint2D(v); 
-style = Style('MarkerColor', 'b', 'MarkerStyle', '+');
+style = Style('MarkerVisible', true, 'MarkerColor', 'b', 'MarkerStyle', '+');
 
 f = figure;
 h = draw(pts, style);

@@ -74,7 +74,7 @@ methods
         
         % default drawing argument
         if isempty(varargin)
-            varargin = 'bo';
+            varargin = {'bo'};
         end
         
         % plot line segment

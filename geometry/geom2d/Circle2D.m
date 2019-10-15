@@ -1,4 +1,4 @@
-classdef Circle2D < Geometry2D
+classdef Circle2D < Curve2D
 % A circle in the plane.
 %
 %   Class Circle2D
