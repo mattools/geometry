@@ -1,4 +1,4 @@
-classdef Patch2D < Geometry2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Patch2D < Geometry2D
 % A 2D parametric grid defined by two arrays x and y.
 %
 %   Class Patch2D

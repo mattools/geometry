@@ -1,4 +1,4 @@
-classdef LineSegment2D < Curve2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineSegment2D < Curve2D
 % A line segment defined by its two extremities.
 %
 %   Class LineSegment2D

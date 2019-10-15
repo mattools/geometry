@@ -1,4 +1,4 @@
-classdef Ellipse2D < Curve2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Ellipse2D < Curve2D
 % A planar ellipse.
 %
 %   An ellipse is defined by five parameters:

@@ -1,4 +1,4 @@
-classdef Curve2D < Geometry2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Curve2D < Geometry2D
 % A tagging interface for curve geometries.
 %
 %   Class Curve2D

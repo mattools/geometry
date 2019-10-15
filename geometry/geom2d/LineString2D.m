@@ -1,4 +1,4 @@
-classdef LineString2D < Curve2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString2D < Curve2D
 % An open polyline composed of several line segments. 
 %
 %   Represents a polyline defined be a series of Coords. 

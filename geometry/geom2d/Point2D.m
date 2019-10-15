@@ -1,4 +1,4 @@
-classdef Point2D < Geometry2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Point2D < Geometry2D
 % A point in the 2-dimensional plane.
 %
 %   Usage:

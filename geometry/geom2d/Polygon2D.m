@@ -1,4 +1,4 @@
-classdef Polygon2D < Geometry2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Polygon2D < Geometry2D
 % A polygon in the plane.
 %
 %   Represents a polygon defined be a series of Coords. 

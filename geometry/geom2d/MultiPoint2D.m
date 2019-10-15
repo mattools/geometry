@@ -1,4 +1,4 @@
-classdef MultiPoint2D < Geometry2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) MultiPoint2D < Geometry2D
 % A set of points in the plane.
 %
 %   Represents a set of Coordinates. 

@@ -72,6 +72,22 @@ assertEqual(testCase, h.Color, [0 0 1]);
 assertEqual(testCase, h.LineWidth, 2);
 close(f);
 
+function test_draw_axis(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+p1 = Point2D(20, 10);
+p2 = Point2D(40, 20);
+seg = LineSegment2D(p1, p2);
+
+f = figure;
+ax = gca;
+
+h = draw(ax, seg, 'Color', 'b', 'LineWidth', 2);
+assertTrue(testCase, ishandle(h));
+assertEqual(testCase, h.Color, [0 0 1]);
+assertEqual(testCase, h.LineWidth, 2);
+close(f);
+
 function test_draw_style(testCase) %#ok<*DEFNU>
 % Test call of function without argument
 
