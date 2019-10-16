@@ -6,7 +6,8 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LinearRing2D < Curve2D
 %   Data are represented by a NV-by-2 array.
 %
 %   Example
-%   LinearRing2D([0 0; 10 0; 10 10; 0 10]);
+%     ring = LinearRing2D([0 0; 10 0; 10 10; 0 10]);
+%     draw(ring);
 %
 %   See also
 %     Geometry2D, LineString2D, Polygon2D
@@ -29,7 +30,7 @@ end % end properties
 %% Constructor
 methods
     function obj = LinearRing2D(varargin)
-    % Constructor for LinearRing2D class
+    % Constructor for LinearRing2D class.
     
         if ~isempty(varargin)
             var1 = varargin{1};
@@ -83,14 +84,75 @@ methods
 %         a = sum(px .* py(iNext) - px(iNext) .* py) / 2;
 %     end
     
+    function poly2 = resample(obj, n)
+        % RESAMPLE Resample this polyline with a given number of vertices.
+        %
+        %   Syntax:  POLY2 = resample(POLY, N);
+
+        % compute arc length along each ertex
+        s = verticesArcLength(obj);
+        
+        % distribute N+1 points equally spaced (the last one is removed at
+        % the end)
+        Lmax = s(end);
+        pos = linspace(0, Lmax, n+1);
+
+        coords = obj.Coords([1:end 1], :);
+        poly2 = zeros(n+1, size(coords, 2));
+        for i = 1:n+1
+            % index of surrounding vertices before and after
+            ind0 = find(s <= pos(i), 1, 'last');
+            ind1 = find(s >= pos(i), 1, 'first');
+            
+            if ind0 == ind1
+                % get position of a vertex in input polyline
+                poly2(i, :) = coords(ind0, :);
+                continue;
+            end
+            
+            % position of surrounding vertices
+            pt0 = coords(ind0, :);
+            pt1 = coords(ind1, :);
+            
+            % weights associated to each neighbor
+            l0 = pos(i) - s(ind0);
+            l1 = s(ind1) - pos(i);
+            
+            % linear interpolation of neighbor positions
+            if (l0 + l1) > Lmax * 1e-12
+                poly2(i, :) = (pt0 * l1 + pt1 * l0) / (l0 + l1);
+            else
+                % if neighbors are too close, do not use interpolation
+                poly2(i, :) = pt0;
+            end
+        end
+        
+        % Remove last vertex (same as first one) and convert result to a
+        % LinearRing2D instance 
+        poly2 = LinearRing2D(poly2(1:end-1,:));
+    end
+    
+    function al = verticesArcLength(obj)
+        % Return the arc length at each vertex of the polyline.
+        %
+        % Syntax:
+        %   AL = verticesArcLength(POLY);
+        % Returns an array AL with one value more than the number of
+        % vertices, as the first vertex is counted twice.
+        
+        % compute the cumulative  sum of the length of each line segment,
+        % and add 0 for the first vertex.
+        al = [0 ; cumsum(sqrt(sum(diff(obj.Coords([1:end 1], :)).^2, 2)))];
+    end
+    
     function p = length(obj)
-        % Computes the length of this polyline
+        % Compute the length of this polyline.
         dp = diff(obj.Coords([1:end 1], :), 1, 1);
         p = sum(hypot(dp(:, 1), dp(:, 2)));
     end
     
     function verts = vertices(obj)
-        % Returns vertices as a new instance of MultiPoint2D
+        % Return vertices as a new instance of MultiPoint2D.
         verts = MultiPoint2D(obj.Coords);
     end
 end
@@ -98,19 +160,19 @@ end
 %% Methods implementing the Geometry2D interface
 methods
     function res = transform(obj, transform)
-        % Applies a geometric transform to this geometry
+        % Apply a geometric transform to this geometry.
         res = LinearRing2D(transformCoords(transform, obj.Coords));
     end
     
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this shape.
         mini = min(obj.Coords);
         maxi = max(obj.Coords);
         box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
     end
     
     function h = draw(varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the current geometry, eventually specifying the style.
         
         % extract drawing options
         [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
@@ -174,19 +236,19 @@ end
 %% Methods implementing the Geometry2D interface (more)
 methods
     function res = scale(obj, varargin)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         factor = varargin{1};
         res = LinearRing2D(obj.Coords * factor);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         shift = varargin{1};
         res = LinearRing2D(bsxfun(@plus, obj.Coords, shift));
     end
     
     function res = rotate(obj, angle, varargin)
-        % Returns a rotated version of this polygon
+        % Return a rotated version of this polyline.
         %
         % POLY2 = rotate(POLY, THETA)
         % POLY2 = rotate(POLY, THETA, CENTER)
@@ -207,13 +269,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'LinearRing2D', 'Coordinates', obj.Coords);
     end
 end
 methods (Static)
     function poly = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         if isfield(str, 'Coordinates')
             poly = LinearRing2D(str.Coordinates);
         elseif isfield(str, 'coordinates')
