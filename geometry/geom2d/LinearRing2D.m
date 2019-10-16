@@ -171,6 +171,39 @@ methods
         box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
     end
     
+    function h = drawVertices(varargin)
+        % Draw vertices of this polyline, with optional drawing options.
+        
+        % extract drawing options
+        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        holdState = ishold(ax);
+        hold(ax, 'on');
+        
+        % default options
+        if isempty(varargin)
+            varargin = {'Marker', 's', 'Color', 'k', 'LineStyle', 'none', 'MarkerFaceColor', 'w'};
+        end
+        
+        % extract data
+        xdata = obj.Coords(:,1);
+        ydata = obj.Coords(:,2);
+        
+        hh = plot(ax, xdata, ydata, varargin{:});
+        if ~isempty(style)
+            apply(style, hh);
+        end
+        
+        if holdState
+            hold(ax, 'on');
+        else
+            hold(ax, 'off');
+        end
+        
+        if nargout > 0
+            h = hh;
+        end
+    end
+    
     function h = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
