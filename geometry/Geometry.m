@@ -29,7 +29,7 @@ end % end constructors
 %% Protected methods for general use
 methods
     function [ax, obj, style, varargin] = parseDrawOptions(varargin)
-        % Returns the different elements necessary to draw the object
+        % Return the different elements necessary to draw the object.
         %
         % Usage:
         % [ax, obj, style, otherOptions] = parseDrawOptions(varargin{:});
@@ -64,7 +64,7 @@ end % end methods
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % Writes geometry into a JSON file
+        % Write geometry into a JSON file.
         % 
         % Requires implementation of the "toStruct" method.
         
@@ -81,7 +81,7 @@ end
 
 methods (Static)
     function geom = fromStruct(str)
-        % Creates a new transform instance from a structure
+        % Create a new transform instance from a structure.
         
         % check existence of 'type' field
         if isfield(str, 'Type')
@@ -101,7 +101,7 @@ methods (Static)
     end
     
     function geom = read(fileName)
-        % Reads a geometry from a file in JSON format
+        %READ Read a geometry from a file in JSON format.
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end

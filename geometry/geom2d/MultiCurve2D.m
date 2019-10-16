@@ -78,7 +78,7 @@ methods
 %     end
     
     function box = boundingBox(obj)
-        % Returns the bounding box of this geometry.
+        % Return the bounding box of this geometry.
         mini = [inf inf];
         maxi = [-inf -inf];
         for i = 1:length(obj.Curves)
@@ -90,7 +90,7 @@ methods
     end
     
     function h = draw(varargin)
-        % Draw the current geometry, eventually specifying the style.
+        %DRAW Draw the current geometry, eventually specifying the style.
         
         [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
 
@@ -108,7 +108,7 @@ methods
     end
     
     function res = scale(obj, factor)
-        % Returns a scaled version of this geometry.
+        % Return a scaled version of this geometry.
         curves2 = cell(1, length(obj.Curves));
         for i = 1:length(obj.Curves)
             curves2{i} = scale(obj.Curves{i}, factor);
@@ -117,7 +117,7 @@ methods
     end
     
     function res = translate(obj, shift)
-        % Returns a translated version of this geometry.
+        % Return a translated version of this geometry.
         curves2 = cell(1, length(obj.Curves));
         for i = 1:length(obj.Curves)
             curves2{i} = translate(obj.Curves{i}, shift);
@@ -126,7 +126,7 @@ methods
     end
     
     function res = rotate(obj, angle, varargin)
-        % Returns a rotated version of this geometry.
+        % Return a rotated version of this geometry.
         %
         % POLY2 = rotate(POLY, THETA)
         % POLY2 = rotate(POLY, THETA, CENTER)

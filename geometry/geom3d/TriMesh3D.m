@@ -34,6 +34,7 @@ end
 %% Constructor
 methods
     function obj = TriMesh3D(varargin)
+        % Constructor for the TriMesh3D class.
         
         if isnumeric(varargin{1})
             obj.Vertices = varargin{1};
@@ -51,6 +52,8 @@ end
 %% Drawing functions
 methods
     function h = drawFaceNormals(obj, varargin)
+        % Draw the normal of each face.
+        %
         % h = drawFaceNormals(mesh);
         pts = faceCentroids(obj);
         pos = pts.Coords;
@@ -63,52 +66,52 @@ end
 %% Global procesing of mesh
 methods
     function res = smooth(obj, varargin)
-       % mesh2 = smooth(mesh, nIter);
-       % Smooth mesh by replacing each vertex by the average of its neighbors
-       
-       % determine number of iterations
-       nIter = 1;
-       if ~isempty(varargin)
-           nIter = varargin{1};
-       end
-       
-       % compute adjacency matrix,
-       % result is a Nv-by-Nv matrix with zeros on the diagonal
-       adj = vertexAdjacencyMatrix(obj);
-       
-       % Add "self adjacencies"
-       nv = size(obj.Vertices, 1);
-       adj = adj + speye(nv);
-       
-       % weight each vertex by the number of its neighbors
-       w = spdiags(full(sum(adj, 2).^(-1)), 0, nv, nv);
-       adj = w * adj;
-       
-       % do averaging to smooth the field
-       v2 = obj.Vertices;
-       for k = 1:nIter
-           v2 = adj * v2;
-       end
-       
-       % return new TriMesh
-       res = TriMesh3D(v2, obj.Faces);
+        % Smooth a mesh.
+        %
+        % mesh2 = smooth(mesh, nIter);
+        % Smoothes the mesh by replacing each vertex by the average of its
+        % neighbors.
+        
+        % determine number of iterations
+        nIter = 1;
+        if ~isempty(varargin)
+            nIter = varargin{1};
+        end
+        
+        % compute adjacency matrix,
+        % result is a Nv-by-Nv matrix with zeros on the diagonal
+        adj = vertexAdjacencyMatrix(obj);
+        
+        % Add "self adjacencies"
+        nv = size(obj.Vertices, 1);
+        adj = adj + speye(nv);
+        
+        % weight each vertex by the number of its neighbors
+        w = spdiags(full(sum(adj, 2).^(-1)), 0, nv, nv);
+        adj = w * adj;
+        
+        % do averaging to smooth the field
+        v2 = obj.Vertices;
+        for k = 1:nIter
+            v2 = adj * v2;
+        end
+        
+        % return new TriMesh
+        res = TriMesh3D(v2, obj.Faces);
     end
     
     function res = subdivide(obj, n)
+        % Create a finer version of the mesh by subdividing each face.
         
         % compute the edge array
-        % edgeVertexIndices = computeMeshEdges(faces);
         computeEdges(obj);
         nEdges = size(obj.Edges, 1);
-        
-        % index of faces around each edge
-        % edgeFaceIndices = meshEdgeFaces(vertices, edges, faces);
         
         % index of edges around each face
         faceEdgeIndices = meshFaceEdges(obj.Vertices, obj.Edges, obj.Faces);
         
         
-        %% Create new vertices on edges
+        % Create new vertices on edges
         
         % several interpolated positions
         t = linspace(0, 1, n + 1)';
@@ -240,7 +243,7 @@ end
 %% Geometric information about mesh
 methods
     function vol = volume(obj)
-        % (signed) volume enclosed by this mesh
+        % (signed) volume enclosed by this mesh.
         %
         % See Also
         %   surfaceArea
@@ -266,7 +269,7 @@ methods
     end
     
     function area = surfaceArea(obj)
-        % surface area of mesh faces
+        % Get the surface area of mesh faces.
         %
         % See Also
         %   volume
@@ -302,15 +305,17 @@ end
 %% Vertex management methods
 methods
     function nv = vertexNumber(obj)
+        % Get the number of vertices in the mesh.
         nv = size(obj.Vertices, 1);
     end
     
     function verts = vertices(obj)
+        % Return vertices in the mesh as a MultiPoint3D.
         verts = MultiPoint3D(obj.Vertices);
     end
     
     function adj = vertexAdjacencyMatrix(obj)
-        % Adjacency matrix of mesh vertices
+        % Get the adjacency matrix of mesh vertices.
         
         % forces faces to be floating point array, for sparse function
         faces = obj.Faces;
@@ -339,6 +344,8 @@ end
 %% Edge management methods
 methods
     function ne = edgeNumber(obj)
+        % Get the number of edges in the mesh.
+        
         % ne = edgeNumber(mesh)
         computeEdges(obj);
         ne = size(obj.Edges, 1);
@@ -355,7 +362,7 @@ end
 
 methods (Access = private)
     function computeEdges(obj)
-        % updates the property Edges
+        % Update the property Edges.
         
         % compute total number of edges
         % (3 edges per face)
@@ -374,6 +381,7 @@ methods (Access = private)
     end
     
     function edgeFaces = computeEdgeFaces(obj)
+        % Update the property EdgeFaces.
         
         % ensure edge array is computed
         if isempty(obj.Edges)
@@ -444,10 +452,13 @@ end
 %% Face management methods
 methods
     function nf = faceNumber(obj)
+        % Get the number of faces in the mesh.
         nf = size(obj.Faces, 1);
     end
     
     function normals = faceNormals(obj, inds)
+        % Compute the normal vector to each face.
+        %
         % vn = faceNormals(mesh);
         
         nf = size(obj.Faces, 1);
@@ -464,6 +475,8 @@ methods
     end
     
     function pts = faceCentroids(obj, inds)
+        % Compute the centroid of each face.
+        %
         % pts = faceCentroids(mesh);
         nf = size(obj.Faces, 1);
         if nargin == 1
@@ -487,14 +500,14 @@ end
 %% Methods implementing Geometry3D
 methods
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this mesh.
         mini = min(obj.Vertices);
         maxi = max(obj.Vertices);
         box = Box3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
     end
     
     function h = draw(varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the current mesh, eventually specifying the style.
         
         % extract handle of axis to draw in
         if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
@@ -535,13 +548,13 @@ methods
     end
     
     function res = scale(obj, varargin)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this mesh.
         factor = varargin{1};
         res = TriMesh3D(obj.Vertices * factor, obj.Faces);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of this geometry
+        % Return a translated version of this mesh.
         shift = varargin{1};
         res = TriMesh3D(bsxfun(@plus, obj.vertexCords, shift), obj.Faces);
     end
@@ -552,7 +565,7 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'TriMesh3D', ...
             'Vertices', obj.Vertices, ...
             'Faces', obj.Faces);
@@ -560,7 +573,7 @@ methods
 end
 methods (Static)
     function mesh = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         if ~(isfield(str, 'Vertices') && isfield(str, 'Faces'))
             error('Requires fields vertices and faces');
         end

@@ -29,7 +29,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Point2D(varargin)
-        % Constructor for Point2D class
+        % Constructor for Point2D class.
         
         % empty constructor -> initialize to origin
         if isempty(varargin)
@@ -73,7 +73,7 @@ end % end constructors
 %% Methods specific to Point2D
 methods
     function d = distance(obj, that)
-        % Distance between two points
+        % Distance between two points.
 
         % check input
         if ~isa(obj, Point2D) || ~isa(that, Point2D)
@@ -90,12 +90,12 @@ end
 %% Methods implementing the Geometry2D interface
 methods
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this shape.
         box = Box2D([obj.X obj.X obj.Y obj.Y]);
     end
     
     function h = draw(varargin)
-        % Draw this point, eventually specifying the style
+        %DRAW Draw this point, eventually specifying the style.
         
         [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
         
@@ -117,7 +117,7 @@ methods
     end
     
     function res = transform(obj, transform)
-        % Applies a geometric transform to this geometry
+        % Apply a geometric transform to this geometry.
         res = Point2D(transformCoords(transform, [obj.X obj.Y]));
     end
 end
@@ -125,19 +125,19 @@ end
 %% Methods implementing the Geometry2D interface (more)
 methods
     function res = scale(obj, varargin)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         factor = varargin{1};
         res = Point2D([obj.X obj.Y] * factor);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         shift = varargin{1};
         res = Point2D(bsxfun(@plus, [obj.X obj.Y], shift));
     end
     
     function res = rotate(obj, angle, varargin)
-        % Returns a rotated version of this point
+        % Return a rotated version of this point.
         %
         % PT2 = rotate(PT, THETA)
         % PT2 = rotate(PT, THETA, CENTER)
@@ -162,13 +162,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('type', 'Point2D', 'X', obj.X, 'Y', obj.Y);
     end
 end
 methods (Static)
     function point = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         point = Point2D(str.X, str.Y);
     end
 end

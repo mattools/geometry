@@ -37,6 +37,7 @@ end % end constructors
 %% Methods
 methods (Static)
     function mesh = createIcosahedron(varargin)
+        % Create a new mesh representing an icosahedron.
         theta = 2*pi/5;
         l = 1/sin(theta/2)/2;
         z1 = sqrt(1-l*l);
@@ -78,6 +79,7 @@ methods (Static)
     end
     
     function mesh = createOctahedron()
+        % Create a new mesh representing an octahedron.
         nodes = [1 0 0;0 1 0;-1 0 0;0 -1 0;0 0 1;0 0 -1];
 %         edges = [1 2;1 4;1 5; 1 6;2 3;2 5;2 6;3 4;3 5;3 6;4 5;4 6];
         faces = [1 2 5;2 3 5;3 4 5;4 1 5;1 6 2;2 6 3;3 6 4;1 4 6];

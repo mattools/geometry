@@ -31,7 +31,7 @@ end % end properties
 %% Constructor
 methods
     function obj = LinearRing3D(varargin)
-    % Constructor for LineString3D class
+    % Constructor for LineString3D class.
     
         if ~isempty(varargin)
             var1 = varargin{1};
@@ -51,7 +51,7 @@ end % end constructors
 %% Methods specific to LinearRing3D
 methods
     function res = smooth(obj, M)
-        % Smoothes a linear ring using local averaging
+        % Smooth a linear ring using local averaging.
         %
         %   RING2 = smooth(RING, M)
 
@@ -77,6 +77,8 @@ methods
     end
     
     function l = length(obj)
+        % Compute the length of this polyline.
+        %
         % L = length(obj);
 
         % compute the sum of the length of each line segment
@@ -84,6 +86,7 @@ methods
     end
     
     function centro = centroid(obj)
+        % Compute the centroid of this polyline.
         
         % compute center and length of each line segment
         centers = (obj.Coords(1:end,:) + obj.Coords([2:end 1],:))/2;
@@ -94,6 +97,7 @@ methods
     end
     
     function nv = vertexNumber(obj)
+        % Get the number of vertices in this polyline.
         nv = size(obj.Coords, 1);
     end
 end
@@ -101,24 +105,24 @@ end
 %% Methods
 methods
     function res = transform(obj, transform)
-        % Applies a geometric transform to this geometry
+        % Apply a geometric transform to this geometry.
         res = LinearRing3D(transformCoords(transform, obj.Coords));
     end
     
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this shape.
         mini = min(obj.Coords);
         maxi = max(obj.Coords);
         box = Box3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
     end
     
     function verts = vertices(obj)
-        % returns vertices as a new instance of MultiPoint3D
+        % Return vertices as a new instance of MultiPoint3D.
         verts = MultiPoint3D(obj.Coords);
     end
     
     function varargout = draw(obj, varargin)
-        % Draw the current geometry, eventually specifying the style
+        % DRAW Draw the current geometry, eventually specifying the style.
         
         h = drawPolyline3d(obj.Coords, 'closed');
         if nargin > 1
@@ -134,13 +138,13 @@ methods
     end
     
     function res = scale(obj, varargin)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         factor = varargin{1};
         res = LinearRing3D(obj.Coords * factor);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         shift = varargin{1};
         res = LinearRing3D(bsxfun(@plus, obj.Coords, shift));
     end
@@ -150,13 +154,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'LinearRing3D', 'Coordinates', obj.Coords);
     end
 end
 methods (Static)
     function poly = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         poly = LinearRing3D(str.Coordinates);
     end
 end

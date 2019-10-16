@@ -33,7 +33,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Box2D(varargin)
-    % Constructor for Box2D class
+    % Constructor for Box2D class.
     
         if ~isempty(varargin)
             var1 = varargin{1};
@@ -61,12 +61,12 @@ end % end constructors
 %% Methods
 methods
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this shape.
         box = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax]);
     end
     
     function varargout = draw(obj, varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the current geometry, eventually specifying the style.
         
         % extract style agument if present
         style = [];
@@ -93,20 +93,20 @@ methods
     end
     
     function res = scale(obj, varargin)
-        % Returns a scaled version of obj geometry
+        % Return a scaled version of obj geometry.
         factor = varargin{1};
         res = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax] * factor);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of obj geometry
+        % Return a translated version of obj geometry.
         shift = varargin{1};
         data2 = [obj.XMin obj.XMax obj.YMin obj.YMax] + shift(1, [1 1 2 2]);
         res = Box2D(data2);
     end
     
     function res = rotate(obj, angle) %#ok<STOUT,INUSD>
-        % Throws an error as a box can not be rotated
+        % Throw an error as a box can not be rotated.
         error('A box can not be rotated');
     end
 end % end methods
@@ -115,7 +115,7 @@ end % end methods
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % Writes box representation into a JSON file
+        % Write box representation into a JSON file.
         % 
         % Requires implementation of the "toStruct" method.
         
@@ -127,7 +127,7 @@ methods
     end
     
     function str = toStruct(obj)
-        % Converts to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('type', 'Box2D', ...
             'XMin', obj.XMin, 'XMax', obj.XMax, ...
             'YMin', obj.YMin, 'YMax', obj.YMax);
@@ -136,7 +136,7 @@ end
 
 methods (Static)
     function box = read(fileName)
-        % Reads box information from a file in JSON format
+        % Read box information from a file in JSON format.
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end
@@ -144,7 +144,7 @@ methods (Static)
     end
     
     function box = fromStruct(str)
-        % Creates a new instance from a structure
+        % Create a new instance from a structure.
         box = Box2D([str.XMin str.XMax str.YMin str.YMax]);
     end
 end

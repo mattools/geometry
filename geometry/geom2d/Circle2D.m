@@ -28,7 +28,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Circle2D(varargin)
-    % Constructor for Circle2D class
+    % Constructor for Circle2D class.
 
         switch nargin
             case 0
@@ -58,11 +58,12 @@ end % end constructors
 %% Methods specific to Circle2D
 methods
     function center = center(obj)
-        % returns the center of this circle as a Point2D
+        % Returns the center of this circle as a Point2D.
         center = Point2D(obj.CenterX, obj.CenterY);
     end
     
     function poly = asPolyline(obj, varargin)
+        % Convert this circle into a polyline.
         
         % determines number of points
         N = 64;
@@ -85,19 +86,19 @@ end
 %% Methods implementing the Geometry2D interface
 methods
     function res = transform(obj, transform) %#ok<STOUT>
-        % Applies a geometric transform to this geometry
+        % Apply a geometric transform to this geometry.
         error('Transform not implemented for Circles');
     end
     
     function box = boundingBox(obj)
-        % Returns the bounding box of this geometry
+        % Return the bounding box of this geometry.
         extX = [obj.CenterX - obj.Radius obj.CenterX + obj.Radius];
         extY = [obj.CenterY - obj.Radius obj.CenterY + obj.Radius];
         box = Box2D([extX extY]);
     end
     
     function h = draw(varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the current geometry, eventually specifying the style.
         
         [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
         
@@ -119,17 +120,17 @@ methods
     end
     
     function res = scale(obj, factor)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         res = Circle2D([obj.CenterX obj.CenterY obj.Radius] * factor);
     end
     
     function res = translate(obj, shift)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         res = Circle2D([obj.CenterX obj.CenterY] + shift,  obj.Radius);
     end
     
     function res = rotate(obj, angle, varargin)
-        % Returns a rotated version of this circle
+        % Return a rotated version of this circle.
         %
         % POLY2 = rotate(POLY, THETA)
         % POLY2 = rotate(POLY, THETA, CENTER)
@@ -143,13 +144,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'Circle2D', 'CenterX', obj.CenterX, 'CenterY', obj.CenterY, 'Radius', obj.Radius);
     end
 end
 methods (Static)
     function circ = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         circ = Circle2D([str.CenterX str.CenterY str.Radius]);
     end
 end

@@ -43,7 +43,7 @@ end % end constructors
 %% Methods specific to Patch3D
 methods
     function res = smooth(obj, M)
-        % Smoothes a polyline using local averaging
+        % Smooth this 3D patch using local averaging.
 
         % create convolution vector
         v2 = ones(M, 1) / M;
@@ -65,13 +65,13 @@ methods
     end
 
     function verts = vertices(obj)
-        % returns vertices as a new instance of MultiPoint3D
+        % Return vertices as a new instance of MultiPoint3D.
         coords = [obj.X(:) obj.Y(:) obj.Z(:)];
         verts = MultiPoint3D(coords);
     end
     
     function drawSubGrid(varargin)
-        % Draws a grid within this patch
+        % Draw a grid within this patch.
         %
         %   drawSubGrid(OBJ, 1) simply displays the boundary of the patch.
         %
@@ -122,7 +122,7 @@ end
 %% Methods implementing the Geometry3D interface
 methods
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this shape.
         xmin = min(obj.X(:));
         xmax = max(obj.X(:));
         ymin = min(obj.Y(:));
@@ -133,7 +133,7 @@ methods
     end    
 
     function h = draw(varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the patch, eventually specifying the style.
         
         % extract handle of axis to draw in
         if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
@@ -168,7 +168,7 @@ methods
     end
     
     function res = transform(obj, transfo)
-        % Returns a transformed version of this geometry
+        % Return a transformed version of this geometry.
         if isa(transfo, 'AffineTransform2D')
             coords = [obj.X(:) obj.Y(:)];
             coords = transformCoords(transfo, coords);
@@ -183,12 +183,12 @@ methods
     end
     
     function res = scale(obj, factor)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         res = Patch3D(obj.X * factor, obj.Y * factor, obj.Z * factor);
     end
     
     function res = translate(obj, shift)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         res = Patch3D(obj.X + shift(1), obj.Y + shift(2), obj.Z + shift(3));
     end
     
@@ -197,13 +197,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'Patch3D', 'X', obj.X, 'Y', obj.Y, 'Z', obj.Z);
     end
 end
 methods (Static)
     function obj = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         obj = Patch3D(str.X, str.Y, str.Z);
     end
 end

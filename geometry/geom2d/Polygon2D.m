@@ -29,7 +29,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Polygon2D(varargin)
-    % Constructor for Polygon2D class
+    % Constructor for Polygon2D class.
     
         if ~isempty(varargin)
             var1 = varargin{1};
@@ -48,7 +48,7 @@ end % end constructors
 %% Methods specific to Polygon2D
 methods
     function centro = centroid(obj)
-        % Computes the centroid of this polygon
+        % Compute the centroid of this polygon.
         
         % isolate coordinates
         px = obj.Coords(:,1);
@@ -69,7 +69,7 @@ methods
     end
     
     function a = area(obj)
-        % Computes the area of this polygon
+        % Compute the area of this polygon.
         
         % isolate coordinates
         px = obj.Coords(:,1);
@@ -84,13 +84,13 @@ methods
     end
     
     function p = perimeter(obj)
-        % Computes the perimeter (boundary length) of this polygon
+        % Compute the perimeter (boundary length) of this polygon.
         dp = diff(obj.Coords([1:end 1], :), 1, 1);
         p = sum(hypot(dp(:, 1), dp(:, 2)));
     end
     
     function verts = vertices(obj)
-        % Returns vertices as a new instance of MultiPoint2D
+        % Return vertices as a new instance of MultiPoint2D.
         verts = MultiPoint2D(obj.Coords);
     end
 end
@@ -98,19 +98,19 @@ end
 %% Methods implementing the Geometry2D interface
 methods
     function res = transform(obj, transform)
-        % Applies a geometric transform to this geometry
+        % Apply a geometric transform to this polygon.
         res = Polygon2D(transformCoords(transform, obj.Coords));
     end
     
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this polygon.
         mini = min(obj.Coords);
         maxi = max(obj.Coords);
         box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
     end
     
     function h = draw(varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the polygon, eventually specifying the style.
         
         % extract drawing options
         [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
@@ -192,19 +192,19 @@ end
 %% Methods implementing the Geometry2D interface (more)
 methods
     function res = scale(obj, varargin)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         factor = varargin{1};
         res = Polygon2D(obj.Coords * factor);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         shift = varargin{1};
         res = Polygon2D(bsxfun(@plus, obj.Coords, shift));
     end
     
     function res = rotate(obj, angle, varargin)
-        % Returns a rotated version of this polygon
+        % Return a rotated version of this polygon.
         %
         % POLY2 = rotate(POLY, THETA)
         % POLY2 = rotate(POLY, THETA, CENTER)
@@ -225,13 +225,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'Polygon2D', 'Coordinates', obj.Coords);
     end
 end
 methods (Static)
     function poly = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         if isfield(str, 'Coordinates')
             poly = Polygon2D(str.Coordinates);
         elseif isfield(str, 'coordinates')

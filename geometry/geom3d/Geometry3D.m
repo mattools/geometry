@@ -37,10 +37,10 @@ end % end constructors
 methods ( Abstract )
     
     box = boundingBox(obj)
-    % Returns the 3D bounding box of obj geometry
+    % Return the 3D bounding box of this geometry.
     
     varargout = draw(obj, varargin)
-    % Draw the current geometry, eventually specifying the style
+    %DRAW Draw the current geometry, eventually specifying the style.
 end
 
 %% Abstract Methods
@@ -48,10 +48,10 @@ end
 methods ( Abstract )
     
     res = scale(obj, varargin)
-    % Returns a scaled version of obj geometry
+    % Return a scaled version of obj geometry.
         
     res = translate(obj, varargin)
-    % Returns a translated version of obj geometry       
+    % Return a translated version of obj geometry.    
     
 end % end methods
 

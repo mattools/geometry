@@ -34,7 +34,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Box3D(varargin)
-        % Constructor for Box3D class
+        % Constructor for Box3D class.
         
         if ~isempty(varargin)
             var1 = varargin{1};
@@ -64,12 +64,12 @@ end % end constructors
 %% Methods
 methods
     function box = boundingBox(obj)
-        % Returns the bounding box of obj shape
+        % Return the bounding box of obj shape.
         box = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax]);
     end
     
     function varargout = draw(obj, varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the box on the current axis.
         
         % extract style agument if present
         style = [];
@@ -93,13 +93,13 @@ methods
     end
     
     function res = scale(obj, varargin)
-        % Returns a scaled version of obj geometry
+        % Return a scaled version of this box.
         factor = varargin{1};
         res = Box3D([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax] * factor);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of obj geometry
+        % Return a translated version of this box.
         shift = varargin{1};
         data2 = [obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax] + shift(1, [1 1 2 2 3 3]);
         res = Box3D(data2);
@@ -110,7 +110,7 @@ end % end methods
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % Writes box representation into a JSON file
+        %WRITE Write box representation into a JSON file.
         %
         % Requires implementation of the "toStruct" method.
         if exist('savejson', 'file') == 0
@@ -120,7 +120,7 @@ methods
     end
     
     function str = toStruct(obj)
-        % Converts to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('type', 'Box3D', ...
             'XMin', obj.XMin, 'XMax', obj.XMax, ...
             'YMin', obj.YMin, 'YMax', obj.YMax, ...

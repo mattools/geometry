@@ -78,7 +78,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Style(varargin)
-    % Constructor for Style class
+    % Constructor for Style class.
 
         if nargin == 0
             return;
@@ -166,7 +166,7 @@ end % end constructors
 %% Methods
 methods
     function apply(obj, h)
-        % apply the style to the given graphic handle(s)
+        % Apply the style to the given graphic handle(s).
         
         hType = get(h, 'Type');
 
@@ -208,7 +208,7 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
 
         % create empty struct
         str = struct();
@@ -299,14 +299,14 @@ methods
     end
     
     function write(obj, fileName, varargin)
-        % Write into a JSON file
+        % Write into a JSON file.
         savejson('', toStruct(obj), 'FileName', fileName, varargin{:});
     end
 end
 
 methods (Static)
     function style = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         
         % create default empty style
         style = Style();
@@ -405,7 +405,7 @@ methods (Static)
     end
     
     function style = read(fileName)
-        % Read a style from a file in JSON format
+        % Read a style from a file in JSON format.
         style = Style.fromStruct(loadjson(fileName));
     end
 end

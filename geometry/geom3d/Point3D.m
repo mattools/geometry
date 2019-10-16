@@ -33,7 +33,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Point3D(varargin)
-    % Constructor for Point3D class
+    % Constructor for Point3D class.
 
         % empty constructor -> initialize to origin
         if isempty(varargin)
@@ -82,12 +82,12 @@ end % end constructors
 %% Methods implementing the Geometry3D interface
 methods
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this shape.
         box = Box3D([obj.X obj.X obj.Y obj.Y obj.Z obj.Z]);
     end
     
     function h = draw(varargin)
-        % Draws this point, eventually specifying the style
+        %DRAW Draw this point, eventually specifying the style.
 
         % extract handle of axis to draw in
         if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
@@ -126,13 +126,13 @@ end
 %% Methods implementing the Geometry3D interface (more)
 methods
     function res = scale(obj, varargin)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         factor = varargin{1};
         res = Point3D([obj.X obj.Y obj.Z] * factor);
     end
     
     function res = translate(obj, varargin)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         shift = varargin{1};
         res = Point3D(bsxfun(@plus, [obj.X obj.Y obj.Z], shift));
     end    
@@ -142,13 +142,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'Point3D', 'X', obj.X, 'Y', obj.Y, 'Z', obj.Z);
     end
 end
 methods (Static)
     function point = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         point = Point3D([str.X str.Y str.Z]);
     end
 end

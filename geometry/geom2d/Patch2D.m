@@ -27,7 +27,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Patch2D(varargin)
-    % Constructor for Patch2D class
+    % Constructor for Patch2D class.
 
         if nargin == 2
             obj.X = varargin{1};
@@ -41,7 +41,7 @@ end % end constructors
 %% Methods specific to Patch2D
 methods
     function res = smooth(obj, M)
-        % Smoothes a polyline using local averaging
+        % Smooth the patch using local averaging.
 
         % create convolution vector
         v2 = ones(M, 1) / M;
@@ -59,13 +59,13 @@ methods
     end
 
     function verts = vertices(obj)
-        % returns vertices as a new instance of MultiPoint2D
+        % Return vertices as a new instance of MultiPoint2D.
         coords = [obj.X(:) obj.Y(:)];
         verts = MultiPoint3D(coords);
     end
     
     function drawSubGrid(varargin)
-        % Draws a grid within this patch
+        % Draw a grid within this patch
         %
         %   drawSubGrid(OBJ, 1) simply displays the boundary of the patch.
         %
@@ -114,7 +114,7 @@ end
 %% Methods implementing the Geometry3D interface
 methods
     function box = boundingBox(obj)
-        % Returns the bounding box of this shape
+        % Return the bounding box of this patch.
         xmin = min(obj.X(:));
         xmax = max(obj.X(:));
         ymin = min(obj.Y(:));
@@ -123,7 +123,7 @@ methods
     end    
 
     function h = draw(varargin)
-        % Draw the current geometry, eventually specifying the style
+        %DRAW Draw the current geometry, eventually specifying the style.
         
         % extract handle of axis to draw in
         if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
@@ -171,7 +171,7 @@ methods
     end
     
     function res = transform(obj, transfo)
-        % Returns a transformed version of this geometry
+        % Return a transformed version of this geometry.
         coords = [obj.X(:) obj.Y(:)];
         coords = transformCoords(transfo, coords);
         dims = size(obj.X);
@@ -179,17 +179,17 @@ methods
     end
     
     function res = scale(obj, factor)
-        % Returns a scaled version of this geometry
+        % Return a scaled version of this geometry.
         res = Patch2D(obj.X * factor, obj.Y * factor);
     end
     
     function res = translate(obj, shift)
-        % Returns a translated version of this geometry
+        % Return a translated version of this geometry.
         res = Patch2D(obj.X + shift(1), obj.Y + shift(2));
     end
     
     function res = rotate(obj, theta)
-        % Returns a rotated version of this geometry
+        % Return a rotated version of this geometry.
         transfo = AffineTransform2D.createRotation(theta);
         res = transform(obj, transfo);
     end
@@ -199,13 +199,13 @@ end % end methods
 %% Serialization methods
 methods
     function str = toStruct(obj)
-        % Convert to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct('Type', 'Patch2D', 'X', obj.X, 'Y', obj.Y);
     end
 end
 methods (Static)
     function obj = fromStruct(str)
-        % Create a new instance from a structure
+        % Create a new instance from a structure.
         obj = Patch2D(str.X, str.Y);
     end
 end

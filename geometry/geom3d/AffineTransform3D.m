@@ -27,6 +27,7 @@ end % end properties
 %% Static factories
 methods (Static)
     function obj = createTranslation(shift, varargin)
+        % Create a new 3D affine transform representing a translation.
         % trans = AffineTransform2D.createTranslation([dx dy])
         if isnumeric(shift)
             if all(size(shift) == [1 3])
@@ -46,6 +47,7 @@ methods (Static)
     end
     
     function obj = identity()
+        % Create a new 3D affine transform representing identity.
         obj = AffineTransform3D([1 0 0 0   0 1 0 0   0 0 1 0]);
     end
 end
@@ -54,7 +56,7 @@ end
 %% Constructor
 methods
     function obj = AffineTransform3D(coeffs)
-    % Constructor for AffineTransform3D class
+    % Constructor for AffineTransform3D class.
     
         if nargin < 1
             coeffs = eye(4);
@@ -75,6 +77,8 @@ end % end constructors
 %% Methods
 methods
     function pts2 = transformCoords(obj, pts)
+        % Apply transform to a set of coordinates.
+        %
         % coords2 = transformPoint(obj, coords)
         % coords should be a N-by-2 numeric array.
         % coords2 has the same size as coords
@@ -87,6 +91,7 @@ methods
     end
     
     function b = isIdentity(obj, varargin)
+        % Check if this transfom is equal to identity.
         if isempty(varargin)
             tol = 1e-10;
         else
@@ -96,16 +101,19 @@ methods
     end
     
     function res = concatenate(obj, obj2)
+        % CONCATENATE Concatenate two transforms.
         mat2 = affineMatrix(obj) * affineMatrix(obj2);
         res = AffineTransform3D(mat2);
     end
     
     
     function res = inverse(obj)
+        % Return the inverse affine transform.
         res = AffineTransform3D(inv(affineMatrix(obj)));
     end
 
     function mat = affineMatrix(obj)
+        % Get the coefficients of the transform as a 4-by-4 matrix.
         mat = [obj.Coeffs(1:4) ; obj.Coeffs(5:8) ; obj.Coeffs(9:12) ; 0 0 0 1];
     end
 
@@ -114,6 +122,7 @@ end % end methods
 %% Overload Matlab computation functions
 methods
     function res = mtimes(obj, obj2)
+        % Overload the mtime operator.
         mat2 = affineMatrix(obj) * affineMatrix(obj2);
         res = AffineTransform3D(mat2);
     end
@@ -123,7 +132,7 @@ end
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % Writes box representation into a JSON file
+        % WRITE Write box representation into a JSON file.
         % 
         % Requires implementation of the "toStruct" method.
         
@@ -135,7 +144,7 @@ methods
     end
     
     function str = toStruct(obj)
-        % Converts to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct(...
             'Type', 'AffineTransform3D', ...
             'Matrix', [obj.Coeffs(1:4) ; obj.Coeffs(5:8) ; obj.Coeffs(9:12) ; 0 0 0 1]);
@@ -144,7 +153,7 @@ end
 
 methods (Static)
     function box = read(fileName)
-        % Reads box information from a file in JSON format
+        %READ Read box information from a file in JSON format.
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end
@@ -152,7 +161,7 @@ methods (Static)
     end
     
     function transfo = fromStruct(str)
-        % Creates a new instance from a structure
+        % Create a new instance from a structure.
         transfo = AffineTransform3D(str.Matrix);
     end
 end
