@@ -32,7 +32,7 @@ methods ( Abstract )
     % Return the bounding box of this geometry.
     box = boundingBox(obj)
     
-    % Draw the current geometry, eventually specifying the style.
+    %DRAW Draw the current geometry, eventually specifying the style.
     varargout = draw(obj, varargin)
 
 %     % Applies a geometric transform to this geometry
@@ -43,14 +43,14 @@ end
 % Not sure we will keep these methods...
 methods ( Abstract )
     
-    res = scale(obj, varargin)
     % Return a scaled version of this geometry.
+    res = scale(obj, varargin)
         
-    res = translate(obj, varargin)
     % Return a translated version of this geometry.       
+    res = translate(obj, varargin)
     
-    res = rotate(obj, varargin)
     % Return a rotated version of this geometry.
+    res = rotate(obj, varargin)
         
 end % end methods
 

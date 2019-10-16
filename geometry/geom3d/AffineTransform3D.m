@@ -4,10 +4,10 @@ classdef AffineTransform3D < handle
 %   Class AffineTransform3D
 %
 %   Example
-%   AffineTransform3D
+%     T = AffineTransform3D.createScaling([3 2 1]);
 %
 %   See also
-%   AffineTransform2D
+%     AffineTransform2D
 
 % ------
 % Author: David Legland
@@ -44,6 +44,28 @@ methods (Static)
         end
          
         obj = AffineTransform3D([1 0 0 dx ; 0 1 0 dy ; 0 0 1 dz; 0 0 0 1]);
+    end
+    
+    function obj = createScaling(factor)
+        % Create a new affine transform representing a scaling.
+        %
+        % Usage:
+        % TRANS = AffineTransform2D.createScaling(S);
+        % TRANS = AffineTransform2D.createScaling([SX SY SZ]);
+        %
+        % Example
+        %     T = AffineTransform3D.createScaling([3 2 1]);
+        
+        if isscalar(factor)
+            sx = factor;
+            sy = factor;
+            sz = factor;
+        else
+            sx = factor(1);
+            sy = factor(2);
+            sz = factor(3);
+        end
+        obj = AffineTransform3D([sx 0 0 0   0 sy 0 0   0 0 sz 0]);
     end
     
     function obj = identity()
@@ -132,9 +154,7 @@ end
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % WRITE Write box representation into a JSON file.
-        % 
-        % Requires implementation of the "toStruct" method.
+        % WRITE Write transform representation into a JSON file.
         
         if exist('savejson', 'file') == 0
             error('Requires the ''jsonlab'' library');
@@ -153,7 +173,7 @@ end
 
 methods (Static)
     function box = read(fileName)
-        %READ Read box information from a file in JSON format.
+        %READ Read transform information from a file in JSON format.
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end

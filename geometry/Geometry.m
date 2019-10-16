@@ -64,7 +64,7 @@ end % end methods
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % Write geometry into a JSON file.
+        %WRITE Write geometry into a JSON file.
         % 
         % Requires implementation of the "toStruct" method.
         

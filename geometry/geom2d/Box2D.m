@@ -115,7 +115,7 @@ end % end methods
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % Write box representation into a JSON file.
+        %WRITE Write box representation into a JSON file.
         % 
         % Requires implementation of the "toStruct" method.
         
@@ -136,7 +136,7 @@ end
 
 methods (Static)
     function box = read(fileName)
-        % Read box information from a file in JSON format.
+        %READ Read box information from a file in JSON format.
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end

@@ -4,7 +4,17 @@ classdef AffineTransform2D < handle
 %   Class AffineTransform2D
 %
 %   Example
-%   AffineTransform2D
+%     % Create sample geometry and transform, compute the transformed
+%     % geometry, and display all results.
+%     poly1 = LineString2D([10 10;20 10;20 20;10 20;10 30;20 30]);
+%     figure; axis equal; axis([0 50 0 50]);hold on;
+%     draw(poly1, 'b');
+%     t1 = AffineTransform2D.createTranslation([-10 -20]);
+%     t2 = AffineTransform2D.createScaling(2);
+%     t3 = AffineTransform2D.createTranslation([25 25]);
+%     transfo = t3 * t2 * t1;
+%     poly2b = transform(poly1, transfo);
+%     draw(poly2b, 'k');
 %
 %   See also
 %
@@ -28,6 +38,8 @@ end % end properties
 %% Static factories
 methods (Static)
     function obj = createTranslation(shift, varargin)
+        % Create a new affine transform representing a translation.
+        %
         % trans = AffineTransform2D.createTranslation([dx dy])
         if isnumeric(shift)
             if all(size(shift) == [1 2])
@@ -45,10 +57,28 @@ methods (Static)
     end
     
     function obj = createRotation(theta)
+        % Create a new affine transform representing a rotation.
+        %
         % trans = AffineTransform2D.createRotation(angleInRadians)
         cot = cos(theta);
         sit = sin(theta);
         obj = AffineTransform2D([cot -sit 0 sit cot 0]);
+    end
+    
+    function obj = createScaling(factor)
+        % Create a new affine transform representing a scaling.
+        %
+        % Usage:
+        % TRANS = AffineTransform2D.createScaling(S);
+        % TRANS = AffineTransform2D.createScaling([SX SY]);
+        if isscalar(factor)
+            sx = factor;
+            sy = factor;
+        else
+            sx = factor(1);
+            sy = factor(2);
+        end
+        obj = AffineTransform2D([sx 0 0   0 sy 0]);
     end
     
     function obj = identity()
@@ -60,7 +90,7 @@ end
 %% Constructor
 methods
     function obj = AffineTransform2D(coeffs)
-    % Constructor for AffineTransform2D class
+    % Constructor for AffineTransform2D class.
     
         if nargin < 1
             coeffs = [1 0 0  0 1 0];
@@ -85,6 +115,8 @@ end % end constructors
 %% Methods
 methods
     function point2 = transformPoint(obj, point)
+        % Apply the transform to a point.
+        %
         % point2 = transformPoint(obj, point)
         if ~isa(point, 'Point2D')
             error('Requires and instance of Point2D');
@@ -97,6 +129,8 @@ methods
     end
     
     function pts2 = transformCoords(obj, pts)
+        % Apply the transform to a set of coordinates.
+        %
         % coords2 = transformPoint(obj, coords)
         % coords should be a N-by-2 numeric array.
         % coords2 has the same size as coords
@@ -117,18 +151,24 @@ methods
     end
     
     function res = concatenate(obj, obj2)
+        %CONCATENATE Concatenate two transforms.
         mat2 = affineMatrix(obj) * affineMatrix(obj2);
         res = AffineTransform2D(mat2);
     end
     
     function res = invert(obj)
+        % Return the inverse transform (deprecated).
+        % Depreated: should use 'inverse' instead.
+        warning('Depreated: should use "inverse" instead.');
         res = AffineTransform2D(inv(affineMatrix(obj)));
     end
     function res = inverse(obj)
+        % Return the inverse transform.
         res = AffineTransform2D(inv(affineMatrix(obj)));
     end
 
     function mat = affineMatrix(obj)
+        % Get the coefficients of the transform as a 3-by-3 matrix.
         mat = [obj.Coeffs(1:3) ; obj.Coeffs(4:6) ; 0 0 1];
     end
 
@@ -138,6 +178,7 @@ end % end methods
 %% Overload Matlab computation functions
 methods
     function res = mtimes(obj, obj2)
+        % overload the mtimes method.
         mat2 = affineMatrix(obj) * affineMatrix(obj2);
         res = AffineTransform2D(mat2);
     end
@@ -147,7 +188,7 @@ end
 %% Serialization methods
 methods
     function write(obj, fileName, varargin)
-        % Writes box representation into a JSON file
+        %WRITE Write transform representation into a JSON file.
         % 
         % Requires implementation of the "toStruct" method.
         
@@ -159,7 +200,7 @@ methods
     end
     
     function str = toStruct(obj)
-        % Converts to a structure to facilitate serialization
+        % Convert to a structure to facilitate serialization.
         str = struct(...
             'Type', 'AffineTransform2D', ...
             'Matrix', [obj.Coeffs(1:3) ; obj.Coeffs(4:6) ; 0 0 1]);
@@ -168,7 +209,7 @@ end
 
 methods (Static)
     function box = read(fileName)
-        % Reads box information from a file in JSON format
+        %READ Read transform information from a file in JSON format.
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end
@@ -176,7 +217,7 @@ methods (Static)
     end
     
     function transfo = fromStruct(str)
-        % Creates a new instance from a structure
+        % Create a new instance from a structure.
         transfo = AffineTransform2D(str.Matrix);
     end
 end

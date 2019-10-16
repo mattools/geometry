@@ -6,7 +6,11 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString2D < Curve2D
 %   Data are represented by a NV-by-2 array.
 %
 %   Example
-%   LineString2D([0 0; 10 0; 10 10; 0 10]);
+%     poly1 = LineString2D([10 10;20 10;20 20;10 20;10 30;20 30]);
+%     figure; axis equal; axis([0 50 0 50]);hold on;
+%     draw(poly1, 'b');
+%     poly2 = poly1.translate([-10 -20]).scale(2).translate([25 25]);
+%     draw(poly2, 'm');
 %
 %   See also
 %   Geometry2d, Polygon2D
@@ -151,7 +155,7 @@ end
 methods
     function res = transform(obj, transform)
         % Apply a geometric transform to this geometry.
-        res = LineStrin2D(transformCoords(transform, obj.Coords));
+        res = LineString2D(transformCoords(transform, obj.Coords));
     end
     
     function box = boundingBox(obj)
