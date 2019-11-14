@@ -1,4 +1,4 @@
-classdef LinearRing3D < Geometry3D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LinearRing3D < Geometry3D
 % A 3D closed polyline composed of several line segments.
 %
 %   Represents a polyline defined be a series of Coords. 
@@ -51,7 +51,7 @@ end % end constructors
 %% Methods specific to LinearRing3D
 methods
     function res = smooth(obj, M)
-        % Smooth a linear ring using local averaging.
+        %SMOOTH Smooth a linear ring using local averaging.
         %
         %   RING2 = smooth(RING, M)
 
@@ -86,7 +86,7 @@ methods
     end
     
     function centro = centroid(obj)
-        % Compute the centroid of this polyline.
+        % Compute the curve centroid of this polyline.
         
         % compute center and length of each line segment
         centers = (obj.Coords(1:end,:) + obj.Coords([2:end 1],:))/2;
@@ -121,21 +121,23 @@ methods
         verts = MultiPoint3D(obj.Coords);
     end
     
-    function varargout = draw(obj, varargin)
+    function varargout = draw(varargin)
         % DRAW Draw the current geometry, eventually specifying the style.
         
-        h = drawPolyline3d(obj.Coords, 'closed');
-        if nargin > 1
-            var1 = varargin{1};
-            if isa(var1, 'Style')
-                apply(var1, h);
-            end
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        
+        inds = [1:size(obj.Coords, 1) 1]; 
+        h = plot3(ax, obj.Coords(inds,1), obj.Coords(inds,2), obj.Coords(inds,3), varargin{:});
+        
+        if ~isempty(style)
+            apply(style, h);
         end
         
         if nargout > 0
             varargout = {h};
         end
-    end
+     end
     
     function res = scale(obj, varargin)
         % Return a scaled version of this geometry.

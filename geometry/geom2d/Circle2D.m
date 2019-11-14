@@ -100,7 +100,8 @@ methods
     function h = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % compute a set of coordinates for drawing circle
         N = 72;

@@ -1,4 +1,4 @@
-classdef MultiPoint3D < handle
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) MultiPoint3D < handle
 % A set of points in the 3D space.
 %
 %   Class MultiPoint3D
@@ -65,31 +65,15 @@ methods
     function h = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        % extract handle of axis to draw in
-        if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
-            hAx = varargin{1};
-            varargin(1)=[];
-        else
-            hAx = gca;
-        end
-
-        % extract the point instance from the list of input arguments
-        obj = varargin{1};
-        varargin(1) = [];
-        
-        % extract optional drawing options
-        options = {};
-        if nargin > 1 && ischar(varargin{1})
-            options = varargin;
-            varargin = {};
-        end
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % draw the geometric primitive
-        hh = plot3(hAx, obj.Coords(:,1), obj.Coords(:,2), obj.Coords(:,3), options{:});
+        hh = plot3(ax, obj.Coords(:,1), obj.Coords(:,2), obj.Coords(:,3), varargin{:});
 
         % optionnally add style processing
-        if ~isempty(varargin) && isa(varargin{1}, 'Style')
-            apply(varargin{1}, hh);
+        if ~isempty(style)
+            apply(style, hh);
         end
         
         % format output argument

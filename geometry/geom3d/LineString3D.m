@@ -1,4 +1,4 @@
-classdef LineString3D < Geometry3D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString3D < Geometry3D
 % An open 3D polyline composed of several line segments.
 %
 %   Represents a polyline defined be a series of Coords. 
@@ -49,7 +49,7 @@ end % end constructors
 %% Methods specific to LineString3D
 methods
     function res = smooth(obj, M)
-        % Smooth a polyline using local averaging.
+        %SMOOTH Smooth a polyline using local averaging.
 
         % create convolution vector
         v2 = ones(M, 1) / M;
@@ -71,7 +71,7 @@ methods
     end
     
     function l = length(obj)
-        % Return the length of this polyline.
+        % Return the curve length of this polyline.
         %
         % L = length(obj);
 
@@ -110,15 +110,16 @@ methods
         verts = MultiPoint3D(obj.Coords);
     end
     
-    function varargout = draw(obj, varargin)
+    function varargout = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        h = drawPolyline3d(obj.Coords);
-        if nargin > 1
-            var1 = varargin{1};
-            if isa(var1, 'Style')
-                apply(var1, h);
-            end
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        
+        h = plot3(ax, obj.Coords(:,1), obj.Coords(:,2), obj.Coords(:,3), varargin{:});
+        
+        if ~isempty(style)
+            apply(style, h);
         end
         
         if nargout > 0

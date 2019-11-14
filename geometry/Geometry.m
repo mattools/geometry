@@ -27,36 +27,50 @@ end % end constructors
 
 
 %% Protected methods for general use
-methods
+methods (Access = protected)
     function [ax, obj, style, varargin] = parseDrawOptions(varargin)
+        warning('Method ''parseDrawOptions'' is deprecated, use ''parseDrawInputArguments'' instead');
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+    end
+    
+    
+    function [ax, obj, style, varargin] = parseDrawInputArguments(varargin)
         % Return the different elements necessary to draw the object.
         %
         % Usage:
-        % [ax, obj, style, otherOptions] = parseDrawOptions(varargin{:});
+        %   [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        %
+        % Returns the following:
+        % - 'ax' is the handle of the axis to draw in, that can be used as
+        %     first input for plot functions. If not specified, the current
+        %     axis is returned.
+        % - 'obj' is the instance of the object, that should be a subclass
+        %     of Geometry
+        % - 'style' is an optional 'Style', that can be used to update the
+        %     drawing style of the graphical object.
+        % - 'varargin' are the remaining input arguments.
         %
         
+        % identify the variable corresponding to class instance
+        ind = cellfun(@(x)isa(x, 'Geometry'), varargin);
+        obj = varargin{ind};
+        varargin(ind) = [];
+        
         % extract handle of axis to draw on
-        arg = varargin{1};
-        if isscalar(arg) && ishandle(arg) && strcmpi(get(arg, 'type'), 'axes')
+        if ~isempty(varargin) && isscalar(varargin{1}) && ishghandle(varargin{1}) && strcmpi(get(varargin{1}, 'type'), 'axes')
             ax = varargin{1};
             varargin(1) = [];
         else
             ax = gca;
         end
-
+        
         % parse optional style info
         style = [];
-        ind = cellfun(@(x)isa(x, 'Style'), varargin);
+        ind = cellfun(@(x) isa(x, 'Style'), varargin);
         if any(ind)
             style = varargin{ind};
             varargin(ind) = [];
         end
-        
-        % assumes obj is first argument of the remaining ones
-        obj = varargin{1};
-        
-        % update varargin array that can contains additional options
-        varargin(1) = [];
     end
     
 end % end methods

@@ -112,8 +112,8 @@ methods
     function h = draw(varargin)
         %DRAW Draw the polygon, eventually specifying the style.
         
-        % extract drawing options
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         holdState = ishold(ax);
         hold(ax, 'on');
 

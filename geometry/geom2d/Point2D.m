@@ -97,7 +97,8 @@ methods
     function h = draw(varargin)
         %DRAW Draw this point, eventually specifying the style.
         
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % default drawing argument
         if isempty(varargin)

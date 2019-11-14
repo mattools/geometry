@@ -70,19 +70,9 @@ methods
         %   drawSubGrid(OBJ, 1) simply displays the boundary of the patch.
         %
         
-        % isolates the object instance
-        ind = find(cellfun(@(x) isa(x, 'Patch2D'), varargin));
-        obj = varargin{ind(1)};
-        varargin(ind(1)) = [];
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
-        % extract handle of axis to draw in
-        if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
-            hAx = varargin{1};
-            varargin(1) = [];
-        else
-            hAx = gca;
-        end
-
         % determines the number of patch tiles
         nTiles = 1;
         if ~isempty(varargin) && isnumeric(varargin{1}) && isscalar(varargin{1})
@@ -99,14 +89,19 @@ methods
             x = obj.X(subI(i), :)';
             y = obj.Y(subI(i), :)';
 
-            plot(hAx, x, y, varargin{:});
+            hx = plot(ax, x, y, varargin{:});
         end
         
         % draw 2D curves in second direction
         for i = 1:length(subJ)
             x = obj.X(:, subJ(i));
             y = obj.Y(:, subJ(i));
-            plot(hAx, x, y, varargin{:});
+            hy = plot(ax, x, y, varargin{:});
+        end
+        
+        if ~isempty(style)
+            apply(style, hx);
+            apply(style, hy);
         end
     end
 end

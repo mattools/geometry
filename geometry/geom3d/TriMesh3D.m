@@ -1,4 +1,4 @@
-classdef TriMesh3D < Geometry3D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) TriMesh3D < Geometry3D
 % Class for representing a 3D triangular mesh.
 %
 %   MESH = TriMesh3D(V, F)
@@ -66,7 +66,7 @@ end
 %% Global procesing of mesh
 methods
     function res = smooth(obj, varargin)
-        % Smooth a mesh.
+        %SMOOTH Smooth a mesh.
         %
         % mesh2 = smooth(mesh, nIter);
         % Smoothes the mesh by replacing each vertex by the average of its
@@ -509,37 +509,24 @@ methods
     function h = draw(varargin)
         %DRAW Draw the current mesh, eventually specifying the style.
         
-        % extract handle of axis to draw in
-        if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
-            hAx = varargin{1};
-            varargin(1) = [];
-        else
-            hAx = gca;
-        end
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
 
-        % extract the point instance from the list of input arguments
-        obj = varargin{1};
-        varargin(1) = [];
-        
         % add default drawing options
         options = {'FaceColor', [.7 .7 .7]};
 
         % extract optional drawing options
-        if nargin > 1 && ischar(varargin{1})
+        if length(varargin) > 1 && ischar(varargin{1})
             options = [options varargin];
         end
         
-        if length(options) == 1
-            options = [{'facecolor', [1 1 1]} options];
-        end
-
-        h = patch('Parent', hAx, ...
+        h = patch('Parent', ax, ...
             'vertices', obj.Vertices, 'faces', obj.Faces, ...
             options{:} );
 
         % optionnally add style processing
-        if ~isempty(varargin) && isa(varargin{1}, 'Style')
-            apply(varargin{1}, hh);
+        if ~isempty(style)
+            apply(style, hh);
         end
                 
         if nargout > 0

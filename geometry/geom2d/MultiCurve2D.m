@@ -92,7 +92,8 @@ methods
     function h = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
 
         hh = zeros(1, length(obj.Curves));
         for i = 1:length(obj.Curves)

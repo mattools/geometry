@@ -53,7 +53,7 @@ end % end constructors
 %% Methods specific to LineString2D
 methods
     function res = smooth(obj, M)
-        % Smooth a polyline using local averaging.
+        %SMOOTH Smooth a polyline using local averaging.
 
         % create convolution vector
         v2 = ones(M, 1) / M;
@@ -173,8 +173,8 @@ methods
     function h = drawVertices(varargin)
         % Draw vertices of this polyline, with optional drawing options.
         
-        % extract drawing options
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         holdState = ishold(ax);
         hold(ax, 'on');
         
@@ -206,8 +206,8 @@ methods
     function h = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        % extract drawing options
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         holdState = ishold(ax);
         hold(ax, 'on');
 

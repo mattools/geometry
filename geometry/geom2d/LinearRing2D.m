@@ -161,7 +161,13 @@ end
 methods
     function res = transform(obj, transform)
         % Apply a geometric transform to this geometry.
-        res = LinearRing2D(transformCoords(transform, obj.Coords));
+        if ismethod(transform, 'transformCoords')
+            res = LinearRing2D(transformCoords(transform, obj.Coords));
+        elseif ismethod(transform, 'transformPoint')
+            res = LinearRing2D(transformPoint(transform, obj.Coords));
+        else
+            error('unable to transform the geometry');
+        end
     end
     
     function box = boundingBox(obj)
@@ -174,8 +180,8 @@ methods
     function h = drawVertices(varargin)
         % Draw vertices of this polyline, with optional drawing options.
         
-        % extract drawing options
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         holdState = ishold(ax);
         hold(ax, 'on');
         
@@ -207,8 +213,8 @@ methods
     function h = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        % extract drawing options
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         holdState = ishold(ax);
         hold(ax, 'on');
 

@@ -1,4 +1,4 @@
-classdef Point3D < Geometry3D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Point3D < Geometry3D
 % A point in the 3-dimensional space.
 %
 %   Usage:
@@ -89,31 +89,15 @@ methods
     function h = draw(varargin)
         %DRAW Draw this point, eventually specifying the style.
 
-        % extract handle of axis to draw in
-        if numel(varargin{1}) == 1 && ishghandle(varargin{1}, 'axes')
-            hAx = varargin{1};
-            varargin(1)=[];
-        else
-            hAx = gca;
-        end
-
-        % extract the point instance from the list of input arguments
-        obj = varargin{1};
-        varargin(1) = [];
-        
-        % extract optional drawing options
-        options = {};
-        if nargin > 1 && ischar(varargin{1})
-            options = varargin;
-            varargin = {};
-        end
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % draw the geometric primitive
-        hh = plot3(hAx, obj.X, obj.Y, obj.Z, options{:});
+        hh = plot3(ax, obj.X, obj.Y, obj.Z, varargin{:});
 
         % optionnally add style processing
-        if ~isempty(varargin) && isa(varargin{1}, 'Style')
-            apply(varargin{1}, hh);
+        if ~isempty(style)
+            apply(style, hh);
         end
         
         % format output argument

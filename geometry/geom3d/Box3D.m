@@ -1,4 +1,4 @@
-classdef Box3D < handle
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Box3D < handle
 % Bounding box of a 3D shape.
 %
 %   Class Box3D
@@ -68,16 +68,11 @@ methods
         box = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax]);
     end
     
-    function varargout = draw(obj, varargin)
+    function varargout = draw(varargin)
         %DRAW Draw the box on the current axis.
         
-        % extract style agument if present
-        style = [];
-        if nargin > 1 && isa(varargin{1}, 'Style')
-            style = varargin{1};
-            varargin(1) = [];
-        end
-        
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+
         % draw the box
         h = drawBox3d([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax], varargin{:});
         
@@ -104,6 +99,50 @@ methods
         data2 = [obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax] + shift(1, [1 1 2 2 3 3]);
         res = Box3D(data2);
     end
+end % end methods
+
+methods (Access = protected)
+    function [ax, obj, style, varargin] = parseDrawInputArguments(varargin)
+        % Return the different elements necessary to draw the object.
+        %
+        % Usage:
+        %   [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        %
+        % Returns the following:
+        % - 'ax' is the handle of the axis to draw in, that can be used as
+        %     first input for plot functions. If not specified, the current
+        %     axis is returned.
+        % - 'obj' is the instance of the object, that should be a subclass
+        %     of Geometry
+        % - 'style' is an optional 'Style', that can be used to update the
+        %     drawing style of the graphical object.
+        % - 'varargin' are the remaining input arguments.
+        %
+        % See Also
+        %   parseDrawInputArguments in Geometry class
+        
+        % identify the variable corresponding to class instance
+        ind = cellfun(@(x)isa(x, 'Geometry'), varargin);
+        obj = varargin{ind};
+        varargin(ind) = [];
+        
+        % extract handle of axis to draw on
+        if ~isempty(varargin) && isscalar(varargin{1}) && ishghandle(varargin{1}) && strcmpi(get(varargin{1}, 'type'), 'axes')
+            ax = varargin{1};
+            varargin(1) = [];
+        else
+            ax = gca;
+        end
+        
+        % parse optional style info
+        style = [];
+        ind = cellfun(@(x) isa(x, 'Style'), varargin);
+        if any(ind)
+            style = varargin{ind};
+            varargin(ind) = [];
+        end
+    end
+    
 end % end methods
 
 

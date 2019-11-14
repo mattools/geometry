@@ -75,7 +75,8 @@ methods
     function h = draw(varargin)
         % Draws the current geometry, eventually specifying the style
 
-        [ax, obj, style, varargin] = parseDrawOptions(varargin{:});
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % plot line segment
         xdata = [obj.P1.X obj.P2.X];
