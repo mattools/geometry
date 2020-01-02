@@ -102,6 +102,15 @@ methods
     end
 end
 
+
+%% Methods generic to curve objects
+methods
+    function res = reverse(obj)
+        res = LinearRing3D(obj.Coords([1 end:-1:2],:));
+    end
+end
+
+
 %% Methods
 methods
     function res = transform(obj, transform)

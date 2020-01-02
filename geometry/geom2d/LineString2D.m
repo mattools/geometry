@@ -151,6 +151,15 @@ methods
     end
 end
 
+
+%% Methods generic to curve objects
+methods
+    function res = reverse(obj)
+        res = LineString2D(obj.Coords(end:-1:1,:));
+    end
+end
+
+
 %% Methods
 methods
     function res = transform(obj, transform)

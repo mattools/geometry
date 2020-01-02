@@ -58,9 +58,14 @@ methods
 end % end constructors
 
 
-%% Methods implementing the Curve2D interface
+%% Methods generic to curve objects
 methods
+    function res = reverse(obj)
+        res = LineSegment2D(obj.P2, obj.P1);
+    end
 end
+
+
 
 
 %% Methods implementing the Geometry2D interface

@@ -157,6 +157,15 @@ methods
     end
 end
 
+
+%% Methods generic to curve objects
+methods
+    function res = reverse(obj)
+        res = LinearRing2D(obj.Coords([1 end:-1:2],:));
+    end
+end
+
+
 %% Methods implementing the Geometry2D interface
 methods
     function res = transform(obj, transform)

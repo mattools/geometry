@@ -96,6 +96,15 @@ methods
     end
 end
 
+
+%% Methods generic to curve objects
+methods
+    function res = reverse(obj)
+        res = LineString3D(obj.Coords(end:-1:1,:));
+    end
+end
+
+
 %% Methods
 methods
     function box = boundingBox(obj)
