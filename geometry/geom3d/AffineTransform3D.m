@@ -98,12 +98,14 @@ end % end constructors
 
 %% Methods
 methods
-    function pts2 = transformCoords(obj, pts)
+    function pts2 = transformPoint(obj, pts)
         % Apply transform to a set of coordinates.
         %
-        % coords2 = transformPoint(obj, coords)
-        % coords should be a N-by-2 numeric array.
-        % coords2 has the same size as coords
+        % P2 = transformPoint(T, P)
+        % T is the tranform object, and P should be a N-by-3 numeric array
+        % representing point coordinates.
+        % The result P2 has the same size as the input array P.
+        %
         
         coeffs = obj.Coeffs;
         pts2 = zeros(size(pts));

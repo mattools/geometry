@@ -81,6 +81,11 @@ end % end constructors
 
 %% Methods implementing the Geometry3D interface
 methods
+    function res = transform(obj, transform)
+        % Apply a geometric transform to this geometry.
+        res = Point3D(transformPoint(transform, [obj.X obj.Y obj.Z]));
+    end
+    
     function box = boundingBox(obj)
         % Return the bounding box of this shape.
         box = Box3D([obj.X obj.X obj.Y obj.Y obj.Z obj.Z]);

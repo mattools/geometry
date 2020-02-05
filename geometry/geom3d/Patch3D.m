@@ -155,12 +155,12 @@ methods
         % Return a transformed version of this geometry.
         if isa(transfo, 'AffineTransform2D')
             coords = [obj.X(:) obj.Y(:)];
-            coords = transformCoords(transfo, coords);
+            coords = transformPoint(transfo, coords);
             dims = size(obj.X);
             res = Patch3D(reshape(coords(:,1), dims), reshape(coords(:,2), dims), obj.Z);
         else
             coords = [obj.X(:) obj.Y(:) obj.Z(:)];
-            coords = transformCoords(transfo, coords);
+            coords = transformPoint(transfo, coords);
             dims = size(obj.X);
             res = Patch3D(reshape(coords(:,1), dims), reshape(coords(:,2), dims), reshape(coords(:,3), dims));
         end

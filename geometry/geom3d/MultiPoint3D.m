@@ -55,6 +55,11 @@ end
 
 %% Methods
 methods
+    function res = transform(obj, transform)
+        % Apply a geometric transform to this geometry.
+        res = MutliPoint3D(transformPoint(transform, obj.Coords));
+    end
+    
     function box = boundingBox(obj)
         % Returns the bounding box of this shape.
         mini = min(obj.Coords);

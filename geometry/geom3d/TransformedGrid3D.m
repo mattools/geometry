@@ -192,10 +192,6 @@ methods
         res = TransformedGrid3D(vx2, vy2, vz2, obj.Transform, steps2);
     end
     
-    function rotate(obj, angle, varargin)
-        % Non supported operation.
-        error('Non supported operation');
-    end
 end % end methods
 
 %% Serialization methods
