@@ -97,9 +97,9 @@ end
 
 %% Methods implementing the Geometry2D interface
 methods
-    function res = transform(obj, transform)
+    function res = transform(obj, transfo)
         % Apply a geometric transform to this polygon.
-        res = Polygon2D(transformCoords(transform, obj.Coords));
+        res = Polygon2D(transformPoint(transfo, obj.Coords));
     end
     
     function box = boundingBox(obj)

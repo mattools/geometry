@@ -113,27 +113,14 @@ end % end constructors
 
 
 %% Methods
-methods
-    function point2 = transformPoint(obj, point)
-        % Apply the transform to a point.
+methods    
+    function pts2 = transformPoint(obj, pts)
+        % Apply this transform to a set of coordinates.
         %
-        % point2 = transformPoint(obj, point)
-        if ~isa(point, 'Point2D')
-            error('Requires and instance of Point2D');
-        end
-        
-        coeffs = obj.Coeffs;
-        x2 = coeffs(1) * point.X + coeffs(2) * point.Y + coeffs(3);
-        y2 = coeffs(4) * point.X + coeffs(5) * point.Y + coeffs(6);
-        point2 = Point2D(x2, y2);
-    end
-    
-    function pts2 = transformCoords(obj, pts)
-        % Apply the transform to a set of coordinates.
-        %
-        % coords2 = transformPoint(obj, coords)
-        % coords should be a N-by-2 numeric array.
-        % coords2 has the same size as coords
+        % P2 = transformPoint(T, P)
+        % T is the transform object, and P should be a N-by-2 numeric array
+        % representing point coordinates.
+        % The result P2 has the same size as the input array P.
         
         coeffs = obj.Coeffs;
         pts2 = zeros(size(pts));

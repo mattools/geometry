@@ -70,6 +70,13 @@ end
 
 %% Methods implementing the Geometry2D interface
 methods
+    function res = transform(obj, transfo)
+        % Apply a geometric transform to this line segment.
+        p1t = transform(obj.P1, transfo);
+        p2t = transform(obj.P2, transfo);
+        res = LineSegment2D(p1t, p2t);
+    end
+    
     function box = boundingBox(obj)
         % Returns the bounding box of this geometry
         x = sort([obj.P1.X obj.P2.X]);

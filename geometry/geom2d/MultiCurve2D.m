@@ -72,10 +72,14 @@ end % end methods
 
 %% Methods implementing the Geometry2D interface
 methods
-%     function res = transform(obj, transform)
-%         % Applies a geometric transform to this geometry
-%         res = MultiPoint2D(transformCoords(transform, obj.Coords));
-%     end
+    function res = transform(obj, transfo)
+        % Applies a geometric transform to this geometry
+        curves = cell(size(obj.Curves));
+        for i = 1:numel(curves)
+            curves{i} = transform(curves{i}, transfo);
+        end
+        res = MultiCurve2D(curves);
+    end
     
     function box = boundingBox(obj)
         % Return the bounding box of this geometry.

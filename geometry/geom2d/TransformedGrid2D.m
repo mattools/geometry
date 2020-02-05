@@ -71,6 +71,11 @@ end % end constructors
 
 %% Methods implementing the Geometry interface
 methods
+    function res = transform(obj, transform) %#ok<STOUT>
+        % Apply a geometric transform to this geometry.
+        error('Transform not implemented for TransformedGrid objects');
+    end
+    
     function box = boundingBox(obj)
         % Returns the bounding box of this geometry.
         [x, y] = meshgrid(obj.XVertices, obj.YVertices);

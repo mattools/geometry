@@ -170,13 +170,7 @@ end
 methods
     function res = transform(obj, transform)
         % Apply a geometric transform to this geometry.
-        if ismethod(transform, 'transformCoords')
-            res = LinearRing2D(transformCoords(transform, obj.Coords));
-        elseif ismethod(transform, 'transformPoint')
-            res = LinearRing2D(transformPoint(transform, obj.Coords));
-        else
-            error('unable to transform the geometry');
-        end
+        res = LinearRing2D(transformPoint(transform, obj.Coords));
     end
     
     function box = boundingBox(obj)

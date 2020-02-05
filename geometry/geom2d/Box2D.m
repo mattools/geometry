@@ -33,7 +33,7 @@ end % end properties
 %% Constructor
 methods
     function obj = Box2D(varargin)
-    % Constructor for Box2D class.
+        % Constructor for Box2D class.
     
         if ~isempty(varargin)
             var1 = varargin{1};
@@ -76,7 +76,6 @@ methods
         end
         
         % draw the box
-%         h = drawBox([obj.XMin obj.XMax obj.YMin obj.YMax], varargin{:});
         tx = [obj.XMin obj.XMax obj.XMax obj.XMin obj.XMin];
         ty = [obj.YMin obj.YMin obj.YMax obj.YMax obj.YMin];
         h = plot(tx, ty, varargin{:});

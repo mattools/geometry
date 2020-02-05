@@ -106,8 +106,16 @@ methods
     end
 end
 
-%% Methods implementing the Geometry3D interface
+%% Methods implementing the Geometry2D interface
 methods
+    function res = transform(obj, transfo)
+        % Apply a geometric transform to this geometry.
+        pts = [obj.X(:) obj.Y()];
+        pts = transformPoint(transfo, pts);
+        dims = size(obj.X);
+        res = Patch2D(reshape(pts(:,1), dims), reshape(pts(:,2), dims));
+    end
+    
     function box = boundingBox(obj)
         % Return the bounding box of this patch.
         xmin = min(obj.X(:));
@@ -163,14 +171,6 @@ methods
         if nargout > 0
             h = hh;
         end
-    end
-    
-    function res = transform(obj, transfo)
-        % Return a transformed version of this geometry.
-        coords = [obj.X(:) obj.Y(:)];
-        coords = transformCoords(transfo, coords);
-        dims = size(obj.X);
-        res = Patch2D(reshape(coords(:,1), dims), reshape(coords(:,2), dims));
     end
     
     function res = scale(obj, factor)

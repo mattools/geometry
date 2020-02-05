@@ -119,7 +119,7 @@ methods
     
     function res = transform(obj, transform)
         % Apply a geometric transform to this geometry.
-        res = Point2D(transformCoords(transform, [obj.X obj.Y]));
+        res = Point2D(transformPoint(transform, [obj.X obj.Y]));
     end
 end
 
@@ -149,6 +149,7 @@ methods
             origin = varargin{1};
         end
         
+        % TODO: replace by AffineTransform2D instance
         rot = createRotation(origin, deg2rad(angle));
         verts = transformPoint([obj.X obj.Y], rot);
         

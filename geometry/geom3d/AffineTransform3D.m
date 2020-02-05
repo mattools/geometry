@@ -102,7 +102,7 @@ methods
         % Apply transform to a set of coordinates.
         %
         % P2 = transformPoint(T, P)
-        % T is the tranform object, and P should be a N-by-3 numeric array
+        % T is the transform object, and P should be a N-by-3 numeric array
         % representing point coordinates.
         % The result P2 has the same size as the input array P.
         %

@@ -57,7 +57,7 @@ end
 methods
     function res = transform(obj, transform)
         % Apply a geometric transform to this geometry.
-        res = MultiPoint2D(transformCoords(transform, obj.Coords));
+        res = MultiPoint2D(transformPoint(transform, obj.Coords));
     end
     
     function box = boundingBox(obj)
