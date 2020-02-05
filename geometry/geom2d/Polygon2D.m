@@ -93,6 +93,16 @@ methods
         % Return vertices as a new instance of MultiPoint2D.
         verts = MultiPoint2D(obj.Coords);
     end
+
+end
+
+%% Methods considering the Polygonas a domain
+methods
+    function bnd = boundary(obj)
+        % Return the boundary of this polygon as a LineaRing2D.
+        bnd = LinearRing2D(obj.Coords);
+    end
+
 end
 
 %% Methods implementing the Geometry2D interface

@@ -1,7 +1,7 @@
 classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LinearRing2D < Curve2D
 % A closed polyline in the plane.
 %
-%   Represents a linear ringdefined be a series of Coords. 
+%   Represents a linear ring defined be a series of Coords. 
 %
 %   Data are represented by a NV-by-2 array.
 %
@@ -14,7 +14,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LinearRing2D < Curve2D
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2018-08-14,    using Matlab 7.9.0.529 (R2009b)
 % Copyright 2013 INRA - Cepia Software Platform.
 
@@ -47,43 +47,7 @@ methods
 end % end constructors
 
 %% Methods specific to LinearRing2D
-methods
-%     function centro = centroid(obj)
-%         % Computes the centroid of this polygon
-%         
-%         % isolate coordinates
-%         px = obj.Coords(:,1);
-%         py = obj.Coords(:,2);
-% 
-%         % indices of next vertices
-%         N = length(obj.Coords);
-%         iNext = [2:N 1];
-%         
-%         % compute cross products
-%         common = px .* py(iNext) - px(iNext) .* py;
-%         sx = sum((px + px(iNext)) .* common);
-%         sy = sum((py + py(iNext)) .* common);
-%         
-%         % area and centroid
-%         area = sum(common) / 2;
-%         centro = Point2D([sx sy] / 6 / area);
-%     end
-    
-%     function a = area(obj)
-%         % Computes the area of this polygon
-%         
-%         % isolate coordinates
-%         px = obj.Coords(:,1);
-%         py = obj.Coords(:,2);
-% 
-%         % indices of next vertices
-%         N = length(obj.Coords);
-%         iNext = [2:N 1];
-%         
-%         % compute area (vectorized version)
-%         a = sum(px .* py(iNext) - px(iNext) .* py) / 2;
-%     end
-    
+methods    
     function poly2 = resample(obj, n)
         % RESAMPLE Resample this polyline with a given number of vertices.
         %
@@ -145,21 +109,41 @@ methods
         al = [0 ; cumsum(sqrt(sum(diff(obj.Coords([1:end 1], :)).^2, 2)))];
     end
     
-    function p = length(obj)
-        % Compute the length of this polyline.
-        dp = diff(obj.Coords([1:end 1], :), 1, 1);
-        p = sum(hypot(dp(:, 1), dp(:, 2)));
+    function centro = centroid(obj)
+        % Return the centroid of this polyline.
+        
+        % compute center and length of each line segment
+        centers = (obj.Coords(1:end,:) + obj.Coords([2:end 1],:))/2;
+        lengths = sqrt(sum(diff(obj.Coords([1:end 1], :), 1).^2, 2));
+        
+        % centroid of edge centers weighted by edge lengths
+        centro = Point2D(sum(bsxfun(@times, centers, lengths), 1) / sum(lengths));
     end
-    
+end
+
+
+%% Methods or management of vertices
+methods
     function verts = vertices(obj)
         % Return vertices as a new instance of MultiPoint2D.
         verts = MultiPoint2D(obj.Coords);
+    end
+    
+    function nv = vertexNumber(obj)
+        % Get the number of vertices.
+        nv = size(obj.Coords, 1);
     end
 end
 
 
 %% Methods generic to curve objects
 methods
+    function p = length(obj)
+        % Compute the length of this polyline.
+        dp = diff(obj.Coords([1:end 1], :), 1, 1);
+        p = sum(hypot(dp(:, 1), dp(:, 2)));
+    end
+    
     function res = reverse(obj)
         res = LinearRing2D(obj.Coords([1 end:-1:2],:));
     end

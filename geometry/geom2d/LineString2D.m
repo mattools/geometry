@@ -17,7 +17,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString2D < Curve2D
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2018-08-14,    using Matlab 7.9.0.529 (R2009b)
 % Copyright 2013 INRA - Cepia Software Platform.
 
@@ -119,6 +119,20 @@ methods
         poly2 = LineString2D(poly2);
     end
     
+    function centro = centroid(obj)
+        % Return the curve-weighted centroid of this polyline.
+        
+        % compute center and length of each line segment
+        centers = (obj.Coords(1:end-1,:) + obj.Coords(2:end,:)) / 2;
+        lengths = sqrt(sum(diff(obj.Coords, 1).^2, 2));
+        
+        % centroid of edge centers weighted by edge lengths
+        centro = Point2D(sum(bsxfun(@times, centers, lengths), 1) / sum(lengths));
+    end
+end
+
+%% Methods or management of vertices
+methods
     function al = verticesArcLength(obj)
         % Return the arc length at each vertex of the polyline.
         
@@ -127,24 +141,6 @@ methods
         al = [0 ; cumsum(sqrt(sum(diff(obj.Coords).^2, 2)))];
     end
 
-    function l = length(obj)
-        % Return the length of this polyline.
-
-        % compute the sum of the length of each line segment
-        l = sum(sqrt(sum(diff(obj.Coords).^2, 2)));
-    end
-    
-    function centro = centroid(obj)
-        % Return the centroid of this polyline.
-        
-        % compute center and length of each line segment
-        centers = (obj.Coords(1:end-1,:) + obj.Coords(2:end,:))/2;
-        lengths = sqrt(sum(diff(obj.Coords).^2, 2));
-        
-        % centroid of edge centers weighted by edge lengths
-        centro = Point2D(sum(bsxfun(@times, centers, lengths), 1) / sum(lengths));
-    end
-    
     function nv = vertexNumber(obj)
         % Get the number of vertices.
         nv = size(obj.Coords, 1);
@@ -154,6 +150,13 @@ end
 
 %% Methods generic to curve objects
 methods
+    function l = length(obj)
+        % Return the length of this polyline.
+        
+        % compute the sum of the length of each line segment
+        l = sum(sqrt(sum(diff(obj.Coords).^2, 2)));
+    end
+    
     function res = reverse(obj)
         res = LineString2D(obj.Coords(end:-1:1,:));
     end
