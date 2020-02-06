@@ -1,4 +1,4 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) TriMesh3D < Geometry3D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) TriMesh3D < Mesh3D
 % Class for representing a 3D triangular mesh.
 %
 %   MESH = TriMesh3D(V, F)
@@ -11,23 +11,23 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) TriMesh3D < Geometry3D
  
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2019-02-07,    using Matlab 9.4.0.813654 (R2018a)
 % Copyright 2018 INRA - Cepia Software Platform.
 
 properties
-    % coordinates of vertices, as a NV-by-3 array
+    % Coordinates of vertices, as a NV-by-3 array.
     Vertices;
     
-    % vertex indices for each edge, as a NE-by-2 array
+    % Vertex indices for each edge, as a NE-by-2 array (optional).
     % Can be empty.
     Edges = [];
     
-    % vertex indices for each face, as a NF-by-3 array
+    % Vertex indices for each face, as a NF-by-3 array.
     Faces;
     
-    % Mapping of faces associated to each edge.
-    % computed with method 'computeEdgeFaces'
+    % Mapping of faces associated to each edge (optional).
+    % updated with method 'computeEdgeFaces'
     EdgeFaces = [];
 end
 
@@ -36,12 +36,20 @@ methods
     function obj = TriMesh3D(varargin)
         % Constructor for the TriMesh3D class.
         
-        if isnumeric(varargin{1})
+        var1 = varargin{1};
+        if isnumeric(var1)
             obj.Vertices = varargin{1};
             obj.Faces = varargin{2};
             
-        elseif isstruct(varargin{1})
-            var1 = varargin{1};
+        elseif nargin == 1 && isa(var1, 'TriMesh3D')
+            % Copy constructor from another TriMesh3D instance.
+            obj.Vertices = var1.Vertices;
+            obj.Edges = var1.Edges;
+            obj.Faces = var1.Faces;
+            obj.EdgeFaces = var1.EdgeFaces;
+
+        elseif isstruct(var1)
+            % Copy constructor from a structure.
             obj.Vertices = var1.vertices;
             obj.Faces = var1.faces;
         end
@@ -269,7 +277,7 @@ methods
     end
     
     function area = surfaceArea(obj)
-        % Get the surface area of mesh faces.
+        % Surface area of this mesh, obtained by summing face areas.
         %
         % See Also
         %   volume
@@ -534,6 +542,14 @@ methods
         end
     end
     
+    function res = transform(obj, transfo)
+        % Apply a transform to this mesh.
+        vt = transformPoint(transfo, obj.Vertices);
+        res = TriMesh3D(vt, obj.Faces);
+        res.Edges = obj.Edges;
+        res.EdgeFaces = obj.EdgeFaces;
+    end
+    
     function res = scale(obj, varargin)
         % Return a scaled version of this mesh.
         factor = varargin{1};
@@ -543,7 +559,7 @@ methods
     function res = translate(obj, varargin)
         % Return a translated version of this mesh.
         shift = varargin{1};
-        res = TriMesh3D(bsxfun(@plus, obj.vertexCords, shift), obj.Faces);
+        res = TriMesh3D(bsxfun(@plus, obj.Vertices, shift), obj.Faces);
     end
     
 end % end methods

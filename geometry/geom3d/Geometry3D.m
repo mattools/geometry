@@ -11,9 +11,9 @@ classdef Geometry3D < Geometry
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2019-02-06,    using Matlab 8.6.0.267246 (R2015b)
-% Copyright 2019 INRA - BIA-BIBS.
+% Copyright 2019 INRAE - BIA-BIBS.
 
 
 %% Properties
