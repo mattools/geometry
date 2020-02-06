@@ -10,7 +10,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineSegment3D < Geomet
 %     draw(L);
 %
 %   See also
-%
+%     Point3D, LineSegment2D
 
 % ------
 % Author: David Legland
@@ -154,7 +154,7 @@ methods
         % Returns a scaled version of this geometry.
         res = LineSegment3D([obj.X1 obj.Y1 obj.Z2] * factor, [obj.X2 obj.Y2 obj.ZZ] * factor);
     end
-    
+   
     function res = translate(obj, shift)
         % Returns a translated version of this geometry.       
         res = LineSegment3D([obj.X1 obj.Y1 obj.Z2] + shift, [obj.X2 obj.Y2 obj.ZZ] + shift);

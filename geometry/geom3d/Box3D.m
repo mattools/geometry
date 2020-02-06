@@ -72,18 +72,52 @@ methods
         %DRAW Draw the box on the current axis.
         
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        if isempty(varargin)
+            varargin = {'color', 'k'};
+        end
+        
+        % create corner points
+        p000 = Point3D(obj.XMin, obj.YMin, obj.ZMin);
+        p100 = Point3D(obj.XMax, obj.YMin, obj.ZMin);
+        p010 = Point3D(obj.XMin, obj.YMax, obj.ZMin);
+        p110 = Point3D(obj.XMax, obj.YMax, obj.ZMin);
+        p001 = Point3D(obj.XMin, obj.YMin, obj.ZMax);
+        p101 = Point3D(obj.XMax, obj.YMin, obj.ZMax);
+        p011 = Point3D(obj.XMin, obj.YMax, obj.ZMax);
+        p111 = Point3D(obj.XMax, obj.YMax, obj.ZMax);
+        
+        % draw the box, by drawing each of the 12 edges as line segments
+        % first the lower face (z=zmin)
+        he(1) = draw(ax, LineSegment3D(p000, p100), varargin{:});
+        he(2) = draw(ax, LineSegment3D(p000, p010), varargin{:});
+        he(3) = draw(ax, LineSegment3D(p100, p110), varargin{:});
+        he(4) = draw(ax, LineSegment3D(p010, p110), varargin{:});
 
-        % draw the box
-        h = drawBox3d([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax], varargin{:});
+        % left face (x=ymin)
+        he(5) = draw(ax, LineSegment3D(p000, p001), varargin{:});
+        he(6) = draw(ax, LineSegment3D(p010, p011), varargin{:});
+        he(7) = draw(ax, LineSegment3D(p001, p011), varargin{:});
+
+        % front face (y=xmin)
+        he(8) = draw(ax, LineSegment3D(p100, p101), varargin{:});
+        he(9) = draw(ax, LineSegment3D(p001, p101), varargin{:});
+        
+        % the last 3 remaining edges
+        he(10) = draw(ax, LineSegment3D(p110, p111), varargin{:});
+        he(11) = draw(ax, LineSegment3D(p101, p111), varargin{:});
+        he(12) = draw(ax, LineSegment3D(p011, p111), varargin{:});
+        
+        gh = hggroup;
+        set(he, 'Parent', gh);
         
         % eventually apply style
         if ~isempty(style)
-            apply(style, h);
+            apply(style, he);
         end
         
         % return handle if requested
         if nargout > 0
-            varargout = {h};
+            varargout = {ge};
         end
     end
     
@@ -122,7 +156,7 @@ methods (Access = protected)
         %   parseDrawInputArguments in Geometry class
         
         % identify the variable corresponding to class instance
-        ind = cellfun(@(x)isa(x, 'Geometry'), varargin);
+        ind = cellfun(@(x)isa(x, 'Box3D'), varargin);
         obj = varargin{ind};
         varargin(ind) = [];
         
