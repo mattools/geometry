@@ -69,12 +69,12 @@ methods (Static)
             [x2 y2 repmat(z1+z2, [5 1])]; ...
             0 0 2*z1+z2];
         
-        edges = [...
-            1 2;1 3;1 4;1 5;1 6; ...
-            2 3;3 4;4 5;5 6;6 2; ...
-            2 7;7 3;3 8;8 4;4 9;9 5;5 10;10 6;6 11;11 2; ...
-            7 8;8 9;9 10;10 11;11 7; ...
-            7 12;8 12;9 12;10 12;11 12];
+%         edges = [...
+%             1 2;1 3;1 4;1 5;1 6; ...
+%             2 3;3 4;4 5;5 6;6 2; ...
+%             2 7;7 3;3 8;8 4;4 9;9 5;5 10;10 6;6 11;11 2; ...
+%             7 8;8 9;9 10;10 11;11 7; ...
+%             7 12;8 12;9 12;10 12;11 12];
         
         % faces are ordered to have normals pointing outside of the mesh
         faces = [...
@@ -83,22 +83,41 @@ methods (Static)
             7 3  8 ; 8 4  9 ; 9  5 10 ; 10  6 11 ; 11 2  7;...
             7 8 12 ; 8 9 12 ; 9 10 12 ; 10 11 12 ; 11 7 12];
 
-        mesh = TriMesh3D(nodes, faces);
-        mesh.Edges = edges;
+        mesh = TriMesh3D.create(nodes, faces);
+%         mesh.Edges = edges;
     end
     
     function mesh = createOctahedron()
         % Create a new mesh representing an octahedron.
         nodes = [1 0 0;0 1 0;-1 0 0;0 -1 0;0 0 1;0 0 -1];
-        edges = [1 2;1 4;1 5; 1 6;2 3;2 5;2 6;3 4;3 5;3 6;4 5;4 6];
+%         edges = [1 2;1 4;1 5; 1 6;2 3;2 5;2 6;3 4;3 5;3 6;4 5;4 6];
         faces = [1 2 5;2 3 5;3 4 5;4 1 5;1 6 2;2 6 3;3 6 4;1 4 6];
 
-        mesh = TriMesh3D(nodes, faces);
-        mesh.Edges = edges;
+        mesh = TriMesh3D.create(nodes, faces);
+%         mesh.Edges = edges;
     end
     
 end % end methods
 
+
+methods (Abstract)
+    % Return the number of vertices in the mesh.
+    nv = vertexNumber(obj);
+    
+    % Return the position of vertices in the mesh.
+    pos = vertexPositions(obj);
+    
+    % Return the number of edges in the mesh.
+    ne = edgeNumber(obj);
+    
+%     edges = edgeVertexIndices(obj);
+    
+    % Return the number of faces in the mesh.
+    nf = faceNumber(obj);
+    
+    % Return the array of vertex indices for each face
+    fv = faceVertexIndices(obj);
+end
 
 %% Serialization methods
 methods
@@ -197,7 +216,7 @@ methods (Static)
             % concatenate with first face
             faces = [face1 ; faces(2:end,:)'+1];
             
-            mesh = TriMesh3D(vertices, faces);
+            mesh = SimpleTriMesh3D(vertices, faces);
             
         catch
             % if attempt failed, switch to slower face-by-face parsing

@@ -1,59 +1,40 @@
 classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) TriMesh3D < Mesh3D
-% Class for representing a 3D triangular mesh.
+% Abstract class for representing a 3D triangular mesh.
 %
-%   MESH = TriMesh3D(V, F)
+%   Parent class for all implementations representing 3D triangular meshes.
 %
 %   Example
 %   TriMesh3D
 %
 %   See also
-%     Meshes3D
+%     Mesh3D
  
 % ------
 % Author: David Legland
 % e-mail: david.legland@inrae.fr
 % Created: 2019-02-07,    using Matlab 9.4.0.813654 (R2018a)
-% Copyright 2018 INRA - Cepia Software Platform.
+% Copyright 2018 INRAE - BIS - BIBS.
 
 properties
-    % Coordinates of vertices, as a NV-by-3 array.
-    Vertices;
-    
-    % Vertex indices for each edge, as a NE-by-2 array (optional).
-    % Can be empty.
-    Edges = [];
-    
-    % Vertex indices for each face, as a NF-by-3 array.
-    Faces;
-    
-    % Mapping of faces associated to each edge (optional).
-    % updated with method 'computeEdgeFaces'
-    EdgeFaces = [];
+end
+
+%% Static factories
+methods (Static)
+    function mesh = create(vertices, faces)
+        % Create a new trimesh from vertex and face arrays.
+        % 
+        % Usage:
+        %   mesh = TriMesh3D.create(vertices, faces);
+        %
+        mesh = SimpleTriMesh3D(vertices, faces);
+    end
 end
 
 %% Constructor
-methods
+methods (Access = protected)
     function obj = TriMesh3D(varargin)
         % Constructor for the TriMesh3D class.
-        
-        var1 = varargin{1};
-        if isnumeric(var1)
-            obj.Vertices = varargin{1};
-            obj.Faces = varargin{2};
-            
-        elseif nargin == 1 && isa(var1, 'TriMesh3D')
-            % Copy constructor from another TriMesh3D instance.
-            obj.Vertices = var1.Vertices;
-            obj.Edges = var1.Edges;
-            obj.Faces = var1.Faces;
-            obj.EdgeFaces = var1.EdgeFaces;
-
-        elseif isstruct(var1)
-            % Copy constructor from a structure.
-            obj.Vertices = var1.vertices;
-            obj.Faces = var1.faces;
-        end
-        
+        % (called by derived class constructors)
     end
 end
 
@@ -91,7 +72,7 @@ methods
         adj = vertexAdjacencyMatrix(obj);
         
         % Add "self adjacencies"
-        nv = size(obj.Vertices, 1);
+        nv = vertexNumber(obj);
         adj = adj + speye(nv);
         
         % weight each vertex by the number of its neighbors
@@ -99,24 +80,34 @@ methods
         adj = w * adj;
         
         % do averaging to smooth the field
-        v2 = obj.Vertices;
+        v2 = vertexPositions(obj);
         for k = 1:nIter
             v2 = adj * v2;
         end
         
         % return new TriMesh
-        res = TriMesh3D(v2, obj.Faces);
+        res = TriMesh3D.create(v2, obj.Faces);
     end
     
-    function res = subdivide(obj, n)
+    function res = subdivide(obj, varargin)
         % Create a finer version of the mesh by subdividing each face.
         
+        % determine number of subdivisions
+        n = 2;
+        if ~isempty(varargin)
+            n = varargin{1};
+        end
+
+        % Extract vertex and faces mesh information
+        vertices  = vertexPositions(obj);
+        faces = faceVertexIndices(obj);
+
         % compute the edge array
-        computeEdges(obj);
-        nEdges = size(obj.Edges, 1);
+        edges = edgeVertexIndices(obj);
+        nEdges = size(edges, 1);
         
         % index of edges around each face
-        faceEdgeIndices = meshFaceEdges(obj.Vertices, obj.Edges, obj.Faces);
+        faceEdgeIndices = TriMesh3D.computeFaceEdgeList(edges, faces);
         
         
         % Create new vertices on edges
@@ -127,7 +118,7 @@ methods
         coef1 = 1 - t(2:end-1);
         
         % initialise the array of new vertices
-        vertices2 = obj.Vertices;
+        vertices2 = vertices;
         
         % keep an array containing index of new vertices for each original edge
         edgeNewVertexIndices = zeros(nEdges, n-1);
@@ -135,8 +126,8 @@ methods
         % create new vertices on each edge
         for iEdge = 1:nEdges
             % extract each extremity as a point
-            v1 = obj.Vertices(obj.Edges(iEdge, 1), :);
-            v2 = obj.Vertices(obj.Edges(iEdge, 2), :);
+            v1 = vertices(edges(iEdge, 1), :);
+            v2 = vertices(edges(iEdge, 2), :);
             
             % compute new points
             newPoints = coef1 * v1 + coef2 * v2;
@@ -147,14 +138,14 @@ methods
         end
         
         
-        % create array
+        % create new face array
         faces2 = zeros(0, 3);
         
         % iterate on faces of initial mesh
-        nFaces = size(obj.Faces, 1);
+        nFaces = size(faces, 1);
         for iFace = 1:nFaces
             % compute index of each corner vertex
-            face = obj.Faces(iFace, :);
+            face = faces(iFace, :);
             iv1 = face(1);
             iv2 = face(2);
             iv3 = face(3);
@@ -171,10 +162,10 @@ methods
             edge3NewVertexIndices = edgeNewVertexIndices(ie3, :);
             
             % keep vertex 1 as reference for edges 1 and 3
-            if obj.Edges(ie1, 1) ~= iv1
+            if edges(ie1, 1) ~= iv1
                 edge1NewVertexIndices = edge1NewVertexIndices(end:-1:1);
             end
-            if obj.Edges(ie3, 1) ~= iv1
+            if edges(ie3, 1) ~= iv1
                 edge3NewVertexIndices = edge3NewVertexIndices(end:-1:1);
             end
             
@@ -223,7 +214,7 @@ methods
             end
             
             % for edge 2, keep vertex 2 of the current face as reference
-            if obj.Edges(ie2, 1) ~= iv2
+            if edges(ie2, 1) ~= iv2
                 edge2NewVertexIndices = edge2NewVertexIndices(end:-1:1);
             end
             
@@ -244,7 +235,58 @@ methods
         end
 
         % create the resulting data structure
-        res = TriMesh3D(vertices2, faces2);
+        res = TriMesh3D.create(vertices2, faces2);
+    end
+end
+
+methods (Static, Access = protected)
+    function FE = computeFaceEdgeList(edges, faces)
+        % Computes list of edge indices for each face.
+        %
+        %   FE = computeFaceEdgeList(E, F)
+        %   Returns a 1-by-NF cell array containing for each face, the set of edge
+        %   indices corresponding to adjacent edges.
+        %
+        %   Example
+        %   meshFaceEdges
+        %
+        %   See also
+        %     meshes3d, meshEdgeFaces
+        
+        % ------
+        % Author: David Legland
+        % e-mail: david.legland@inra.fr
+        % Created: 2013-08-22,    using Matlab 7.9.0.529 (R2009b)
+        % Copyright 2013 INRA - Cepia Software Platform.
+        
+        nFaces = size(faces, 1);
+        
+        FE = cell(nFaces, 1);
+        
+        % impose ordering of edge indices
+        edges = sort(edges, 2);
+        
+        for iFace = 1:nFaces
+            % extract vertex indices of current face
+            face = meshFace(faces, iFace);
+            nv = length(face);
+            
+            % for each couple of adjacent vertices, find the index of the matching
+            % row in the edges array
+            fei = zeros(1, nv);
+            for iEdge = 1:nv
+                % compute index of each edge vertex
+                edge = sort([face(iEdge) face(mod(iEdge, nv) + 1)]);
+                v1 = edge(1);
+                v2 = edge(2);
+                
+                % find the matching row
+                ind = find(edges(:,1) == v1 & edges(:,2) == v2);
+                fei(iEdge) = ind;
+                
+            end
+            FE{iFace} = fei;
+        end
     end
 end
 
@@ -256,17 +298,21 @@ methods
         % See Also
         %   surfaceArea
 
+        % get mesh data
+        vertices = vertexPositions(obj);
+        faces = faceVertexIndices(obj);
+
         % initialize an array of volume
-        nFaces = size(obj.Faces, 1);
+        nFaces = size(faces, 1);
         vols = zeros(nFaces, 1);
 
         % Shift all vertices to the mesh centroid
-        centroid = mean(obj.Vertices, 1);
+        centroid = mean(vertices, 1);
         
         % compute volume of each tetraedron
         for iFace = 1:nFaces
             % consider the tetrahedron formed by face and mesh centroid
-            tetra = obj.Vertices(obj.Faces(iFace, :), :);
+            tetra = vertices(faces(iFace, :), :);
             tetra = bsxfun(@minus, tetra, centroid);
             
             % volume of current tetrahedron
@@ -282,10 +328,14 @@ methods
         % See Also
         %   volume
         
+        % get mesh data
+        vertices = vertexPositions(obj);
+        faces = faceVertexIndices(obj);
+
         % compute two direction vectors of each trinagular face, using the
         % first vertex of each face as origin
-        v1 = obj.Vertices(obj.Faces(:, 2), :) - obj.Vertices(obj.Faces(:, 1), :);
-        v2 = obj.Vertices(obj.Faces(:, 3), :) - obj.Vertices(obj.Faces(:, 1), :);
+        v1 = vertices(faces(:, 2), :) - vertices(faces(:, 1), :);
+        v2 = vertices(faces(:, 3), :) - vertices(faces(:, 1), :);
         
         % area of each triangle is half the cross product norm
         % see also crossProduct3d in MatGeom
@@ -312,23 +362,19 @@ end
 
 %% Vertex management methods
 methods
-    function nv = vertexNumber(obj)
-        % Get the number of vertices in the mesh.
-        nv = size(obj.Vertices, 1);
-    end
     
     function verts = vertices(obj)
         % Return vertices in the mesh as a MultiPoint3D.
-        verts = MultiPoint3D(obj.Vertices);
+        verts = MultiPoint3D(vertexPositions(obj));
     end
     
     function adj = vertexAdjacencyMatrix(obj)
         % Get the adjacency matrix of mesh vertices.
         
         % forces faces to be floating point array, for sparse function
-        faces = obj.Faces;
+        faces = faceVertexIndices(obj);
         if ~isfloat(faces)
-            faces = double(obj.Faces);
+            faces = double(faces);
         end
         
         % populate a sparse matrix
@@ -341,8 +387,8 @@ methods
         adj = min(adj, 1);
         
         % ensure the size of the matrix is Nv-by-Nv
-        % (this can happen if some vertices are not referenced)
-        nv = size(obj.Vertices, 1);
+        % (this may happen if some vertices are not referenced)
+        nv = vertexNumber(obj);
         if size(adj, 1) < nv
             adj(nv, nv) = 0;
         end
@@ -353,130 +399,48 @@ end
 methods
     function ne = edgeNumber(obj)
         % Get the number of edges in the mesh.
-        
-        % ne = edgeNumber(mesh)
-        computeEdges(obj);
-        ne = size(obj.Edges, 1);
-    end
-        
-    function edgeList = edges(obj)
-        % edgeList = edges(mesh);
-        if isempty(obj.Edges)
-            computeEdges(obj);
-        end
-        edgeList = obj.Edges;
-    end
-end
-
-methods (Access = private)
-    function computeEdges(obj)
-        % Update the property Edges.
-        
-        % compute total number of edges
-        % (3 edges per face)
-        nFaces  = size(obj.Faces, 1);
-        nEdges  = nFaces * 3;
-        
-        % create vertex indices for all edges (including duplicates)
-        edges = zeros(nEdges, 2);
-        for i = 1:nFaces
-            f = obj.Faces(i, :);
-            edges(((i-1)*3+1):i*3, :) = [f' f([2:end 1])'];
-        end
-        
-        % remove duplicate edges, and sort the result
-        obj.Edges = sortrows(unique(sort(edges, 2), 'rows'));
+        %
+        % See Also
+        %   edgeVertexIndices
+        ne = size(edgeVertexIndices(obj), 1);
     end
     
-    function edgeFaces = computeEdgeFaces(obj)
-        % Update the property EdgeFaces.
+    function edges = edgeVertexIndices(obj)
+        % Compute edge vertex indices.
         
-        % ensure edge array is computed
-        if isempty(obj.Edges)
-            computeEdges(obj);
-        end
-        edges = obj.Edges;
+        % get mesh face vertex indices
+        faces = faceVertexIndices(obj);
         
-        % allocate memory for result
-        nEdges = size(obj.Edges, 1);
-        obj.EdgeFaces = zeros(nEdges, 2);
-
-        % iterate on faces
-        nFaces = size(obj.Faces, 1);
-        for iFace = 1:nFaces
-            face = obj.Faces(iFace, :);
-            
-            % iterate on edges of current face
-            for j = 1:length(face)
-                % build edge: array of vertices
-                j2 = mod(j, length(face)) + 1;
-                
-                % do not process edges with same vertices
-                if face(j) == face(j2)
-                    continue;
-                end
-                
-                % vertex indices of current edge
-                currentEdge = [face(j) face(j2)];
-                
-                % find index of current edge, assuming face is left-located
-                b1 = ismember(obj.Edges, currentEdge, 'rows');
-                indEdge = find(b1);
-                if ~isempty(indEdge)
-                    if obj.EdgeFaces(indEdge, 1) ~= 0
-                        error('TriMesh3D:subdivide:IllegalTopology', ...
-                            'Two faces were found on left side of edge %d ', indEdge);
-                    end
-                    
-                    obj.EdgeFaces(indEdge, 1) = iFace;
-                    continue;
-                end
-                
-                % otherwise, assume the face is right-located
-                b2 = ismember(edges, currentEdge([2 1]), 'rows');
-                indEdge = find(b2);
-                if ~isempty(indEdge)
-                    if obj.EdgeFaces(indEdge, 2) ~= 0
-                        error('TriMesh3D:subdivide:IllegalTopology', ...
-                            'Two faces were found on left side of edge %d ', indEdge);
-                    end
-                    
-                    obj.EdgeFaces(indEdge, 2) = iFace;
-                    continue;
-                end
-                
-                % If face was neither left nor right, error
-                warning('TriMesh3D:subdivide:IllegalTopology', ...
-                    'Edge %d of face %d was not found in edge array', ...
-                    j, iFace);
-                continue;
-            end
-        end
+        % create vertex indices for all edges (including duplicates)
+        edges = [...
+            faces(:,1) faces(:,2) ; ...
+            faces(:,2) faces(:,3) ; ...
+            faces(:,3) faces(:,1)];
         
-        edgeFaces = obj.EdgeFaces;
+        % remove duplicate edges, and sort the result
+        edges = sortrows(unique(sort(edges, 2), 'rows'));
     end
 end
+
 
 %% Face management methods
 methods
-    function nf = faceNumber(obj)
-        % Get the number of faces in the mesh.
-        nf = size(obj.Faces, 1);
-    end
-    
     function normals = faceNormals(obj, inds)
         % Compute the normal vector to each face.
         %
         % vn = faceNormals(mesh);
         
-        nf = size(obj.Faces, 1);
+        vertices = vertexPositions(obj);
+        faces = faceVertexIndices(obj);
+        
+        nf = size(faces, 1);
         if nargin == 1
             inds = 1:nf;
         end
 
         % compute vector of each edge
-        v1 = obj.Vertices(obj.Faces(inds,2),:) - obj.Vertices(obj.Faces(inds,1),:);
-        v2 = obj.Vertices(obj.Faces(inds,3),:) - obj.Vertices(obj.Faces(inds,1),:);
+        v1 = vertices(faces(inds,2),:) - vertices(faces(inds,1),:);
+        v2 = vertices(faces(inds,3),:) - vertices(faces(inds,1),:);
 
         % compute normals using cross product (vectors have same size)
         normals = cross(v1, v2, 2);
@@ -486,16 +450,24 @@ methods
         % Compute the centroid of each face.
         %
         % pts = faceCentroids(mesh);
-        nf = size(obj.Faces, 1);
+        
+        % determine indices of face to process
+        nf = faceNumber(obj);
         if nargin == 1
             inds = 1:nf;
         end
-        pts = zeros(length(inds), 3);
         
+        % get mesh data
+        vertices = vertexPositions(obj);
+        faces = faceVertexIndices(obj);
+        
+        % process centroids in parallel
+        pts = zeros(length(inds), 3);
         for i = 1:3
-            pts = pts + obj.Vertices(obj.Faces(inds,i),:) / 3;
+            pts = pts + vertices(faces(inds,i),:) / 3;
         end
         
+        % create Geometry object for storing result
         pts = MultiPoint3D(pts);
     end
 
@@ -509,8 +481,8 @@ end
 methods
     function box = boundingBox(obj)
         % Return the bounding box of this mesh.
-        mini = min(obj.Vertices);
-        maxi = max(obj.Vertices);
+        mini = min(vertexPositions(obj));
+        maxi = max(vertexPositions(obj));
         box = Box3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
     end
     
@@ -529,7 +501,8 @@ methods
         end
         
         h = patch('Parent', ax, ...
-            'vertices', obj.Vertices, 'faces', obj.Faces, ...
+            'vertices', vertexPositions(obj), ...
+            'faces', faceVertexIndices(obj), ...
             options{:} );
 
         % optionnally add style processing
@@ -544,28 +517,39 @@ methods
     
     function res = transform(obj, transfo)
         % Apply a transform to this mesh.
-        vt = transformPoint(transfo, obj.Vertices);
-        res = TriMesh3D(vt, obj.Faces);
-        res.Edges = obj.Edges;
-        res.EdgeFaces = obj.EdgeFaces;
+        vt = transformPoint(transfo, vertexPositions(obj));
+        res = TriMesh3D.create(vt, obj.Faces);
     end
     
     function res = scale(obj, varargin)
         % Return a scaled version of this mesh.
         factor = varargin{1};
-        res = TriMesh3D(obj.Vertices * factor, obj.Faces);
+        res = TriMesh3D.create(vertexPositions(obj) * factor, obj.Faces);
     end
     
     function res = translate(obj, varargin)
         % Return a translated version of this mesh.
         shift = varargin{1};
-        res = TriMesh3D(bsxfun(@plus, obj.Vertices, shift), obj.Faces);
+        res = TriMesh3D.create(bsxfun(@plus, vertexPositions(obj), shift), obj.Faces);
     end
     
 end % end methods
 
+%% Access methods
+% Declares new methods.
+methods (Abstract)
+    % Return the Nv-by-3 array of vertex coordinates.
+    v = vertexPositions(obj);
+    
+    % Return the Nf-by-3 array of face vertex indices.
+    f = faceVertexIndices(obj);
+end
+
 
 %% Serialization methods
+% Uses default implementation that creates / save only vertices and faces.
+% Specialized implementation may manage more data.
+
 methods
     function str = toStruct(obj)
         % Convert to a structure to facilitate serialization.
@@ -574,6 +558,7 @@ methods
             'Faces', obj.Faces);
     end
 end
+
 methods (Static)
     function mesh = fromStruct(str)
         % Create a new instance from a structure.
@@ -583,7 +568,7 @@ methods (Static)
         if size(str.Faces, 2) ~= 3
             error('Requires a triangular face array');
         end
-        mesh = TriMesh3D(str);
+        mesh = TriMesh3D.create(str.Vertices, str.Faces);
     end
 end
 
