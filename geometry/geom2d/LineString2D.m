@@ -73,7 +73,74 @@ methods
         % convert result to LineString object
         res = LineString2D(res);
     end
+    
+    function [poly2, keepInds] = simplify(obj, tol)
+        % Douglas-Peucker simplification of this polyline.
+        %
+        %   LS2 = simplify(LD, TOL);
+        %
+        %   See also
+        %     resample
 
+        % number of vertices
+        n = size(obj.Coords, 1);
+        
+        % initial call to the recursive function
+        keepInds = recurseSimplify(1, n);
+        
+        % keep first and last vertices
+        keepInds = [1 keepInds n];
+        
+        % create the resulting polyline
+        poly2 = LineString2D(obj.Coords(keepInds, :));
+        
+        function innerInds = recurseSimplify(i0, i1)
+            % Inner function called recursively on polyline portions.
+            
+            % for single edges, return empty result
+            if i1 - i0 < 2
+                innerInds = [];
+                return;
+            end
+            
+            % find the furthest vertex
+            mid = furthestPointIndex(i0, i1);
+            
+            % case of no further simplification
+            if isempty(mid)
+                innerInds = mid;
+                return;
+            end
+            
+            % recursively subdivide each portion
+            mid1 = recurseSimplify(i0, mid);
+            mid2 = recurseSimplify(mid, i1);
+            
+            % concatenate indices of all portions
+            innerInds = [mid1 mid mid2];
+        end
+        
+        function ind = furthestPointIndex(i0, i1)
+            % Inner function for finding furthest point index in sub-curve
+            
+            % extreme points of the current edge
+            p0 = Point2D(obj.Coords(i0, :));
+            p1 = Point2D(obj.Coords(i1, :));
+            
+            % find vertex with the greatest distance
+            seg = LineSegment2D(p0, p1);
+            dists = distancePoint(seg, obj.Coords(i0+1:i1-1, :)); 
+            [maxi, ind] = max(dists);
+            
+            % update index only if distance criterion is verified
+            if maxi > tol
+                ind = i0 + ind;
+            else
+                ind = [];
+            end
+        end
+    end
+    
     function poly2 = resample(obj, n)
         % RESAMPLE Resample this polyline with a given number of vertices.
         %

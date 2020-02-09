@@ -47,7 +47,30 @@ methods
 end % end constructors
 
 %% Methods specific to LinearRing2D
-methods    
+methods
+    function res = simplify(obj, tol)
+        % Douglas-Peucker simplification of this linear ring.
+        %
+        %   LS2 = simplify(LD, TOL);
+        %
+        %   Example
+        %     elli = Ellipse2D([50 50 40 30  20]);
+        %     ring = asPolyline(elli, 200);
+        %     figure; axis equal; axis([0 100 0 100]); hold on;
+        %     draw(ring, 'b');
+        %     ring2 = simplify(ring, 2);
+        %     draw(ring2, 'm');
+        %     drawVertices(ring2);
+        %
+        %   See also
+        %     resample
+        
+        % Use LineString2D implementation
+        ls = LineString2D(obj.Coords([1:end 1], :));
+        ls2 = simplify(ls, tol);
+        res = LinearRing2D(ls2.Coords(1:end-1, :));
+    end
+    
     function poly2 = resample(obj, n)
         % RESAMPLE Resample this polyline with a given number of vertices.
         %
