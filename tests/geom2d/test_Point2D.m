@@ -24,6 +24,14 @@ p = Point2D([3 4]);
 assertEqual(testCase, 3, p.X);
 assertEqual(testCase, 4, p.Y);
 
+
+function test_subsref(testCase)
+
+p = Point2D([3 4]);
+assertEqual(testCase, 3, p(1));
+assertEqual(testCase, 4, p(2));
+
+
 function test_Serialize(testCase)
 % Test call of function without argument
 
