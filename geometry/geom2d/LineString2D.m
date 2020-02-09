@@ -398,6 +398,47 @@ end
 
 %% sub-indexing methods
 methods
+    function varargout = size(obj, varargin)
+        % Return the size of this polyline.
+        if nargout <= 1
+            % compute dim
+            if nargin == 2
+                s = size(obj.Coords, varargin{1});
+            else
+                s = size(obj.Coords);
+            end
+            varargout = {s};
+            
+        else
+            
+            s = [size(obj.Coords, 1), size(obj.Coords, 2)];
+            varargout = num2cell(s);
+        end
+    end
+    
+    function ind = end(obj, k, n)
+        % Determine last index when accessing a polyline.
+        %
+        %   See Also
+        %     subsref
+        
+        if n == 1
+            ind = size(obj.Coords, 1);
+        elseif n == 2
+            if k == 1 
+                ind = size(obj.Coords, 1);
+            elseif k == 2
+                ind = 2;
+            else
+                error('LineString2D:end', ...
+                    'Only two dimensions can be accessed');
+            end
+        else
+            error('LineString2D:end', ...
+                'Only two dimensions can be accessed');
+        end
+    end
+    
     function varargout = subsref(obj, subs)
         % Overrides subsref function for LineString2D objects.
         
@@ -438,7 +479,7 @@ methods
                 end
                 
             elseif ns == 2
-                % Return coordiantes at specified indices and dimensons
+                % Return coordinates at specified indices and dimensions
                 sub1 = s1.subs{1};
                 if ischar(sub1) && strcmp(sub1, ':')
                     sub1 = 1:size(obj.Coords, 1);
