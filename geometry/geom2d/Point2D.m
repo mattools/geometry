@@ -76,7 +76,7 @@ methods
         % Distance between two points.
 
         % check input
-        if ~isa(obj, Point2D) || ~isa(that, Point2D)
+        if ~isa(obj, 'Point2D') || ~isa(that, 'Point2D')
             error('Both arguments must be instances of Point2D');
         end
         

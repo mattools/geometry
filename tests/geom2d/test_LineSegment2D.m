@@ -45,6 +45,31 @@ seg2 = LineSegment2D(seg1);
 
 assertTrue(testCase, isa(seg2, 'LineSegment2D'));
 
+
+function test_distancePoint(testCase) %#ok<*DEFNU>
+
+% create line segment with slope 3/4
+p1 = Point2D(10, 10);
+p2 = Point2D(50, 40);
+seg = LineSegment2D(p1, p2);
+
+% points around P1
+pt1 = Point2D(10+3, 10-4);
+assertEqual(testCase, seg.distance(pt1), 5.0, 'AbsTol', 0.01);
+pt2 = Point2D(10-4, 10-3);
+assertEqual(testCase, seg.distance(pt2), 5.0, 'AbsTol', 0.01);
+pt3 = Point2D(10-3, 10+4);
+assertEqual(testCase, seg.distance(pt3), 5.0, 'AbsTol', 0.01);
+
+% points around P1
+pt4 = Point2D(50+3, 40-4);
+assertEqual(testCase, seg.distance(pt4), 5.0, 'AbsTol', 0.01);
+pt5 = Point2D(50+4, 40+3);
+assertEqual(testCase, seg.distance(pt5), 5.0, 'AbsTol', 0.01);
+pt6 = Point2D(50-3, 40+4);
+assertEqual(testCase, seg.distance(pt6), 5.0, 'AbsTol', 0.01);
+
+
 function test_draw_simple(testCase) %#ok<*DEFNU>
 % Test call of function without argument
 

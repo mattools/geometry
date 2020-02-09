@@ -79,6 +79,38 @@ methods
 end % end constructors
 
 
+%% Methods specific to LineSegment2D
+methods
+    function [dist, pos] = distancePoint(obj, point)
+        % Minimum distance between point(s) and this line segment.
+        
+        % direction vector of the line segment
+        vx = obj.X2 - obj.X1;
+        vy = obj.Y2 - obj.Y1;
+        
+        % squared length of edges, with a check of validity
+        delta = vx .* vx + vy .* vy;
+        
+        % difference of coordinates between points and first point
+        dx  = point(:, 1) - obj.X1;
+        dy  = point(:, 2) - obj.Y1;
+        
+        % compute position of points projected on the supporting line,
+        % by using normalised dot product (NP-by-NE array)
+        if delta > eps
+            % ensure projected point is located on the edge
+            pos = min(max((dx * vx + dy * vy) / delta, 0), 1);
+        else
+            % consider point1 is the closest egde point
+            pos = 0;
+        end
+        
+        % compute distance between point and its projection on the edge
+        dist = hypot(pos * vx - dx, pos * vy - dy);
+    end
+end
+
+
 %% Methods generic to curve objects
 methods
     function l = length(obj)
@@ -105,10 +137,25 @@ methods
 end
 
 
-
-
 %% Methods implementing the Geometry2D interface
 methods
+    function [dist, pos] = distance(obj, point)
+        % Distance between point(s) and this line segment.
+        %
+        % Example:
+        %   seg = LineSegment2D(Point2D(10, 10), Point2D(70, 55));
+        %   p = Point2D(56, 32);
+        %   distance(seg, p)
+        %   ans =
+        %       10
+        %
+        % see also
+        %   distancePoint
+        if isa(point, 'Point2D')
+            [dist, pos] = distancePoint(obj, [point.X point.Y]);
+        end
+    end
+    
     function res = transform(obj, transfo)
         % Apply a geometric transform to this line segment.
         p1t = transformPoint(transfo, [obj.X1 obj.Y1]);
