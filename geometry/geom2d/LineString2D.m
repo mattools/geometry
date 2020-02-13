@@ -395,7 +395,6 @@ methods (Static)
 end
 
 
-
 %% sub-indexing methods
 methods
     function varargout = size(obj, varargin)
@@ -502,7 +501,6 @@ methods
             error('LineString2D:subsref', ...
                 ['can not manage such reference: ' type]);
         end
-        
     end
 end
 

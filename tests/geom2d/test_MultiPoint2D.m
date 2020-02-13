@@ -25,6 +25,53 @@ pts = MultiPoint2D(v);
 assertTrue(testCase, isa(pts, 'MultiPoint2D'));
 
 
+function test_subsref_s1_scalar(testCase) %#ok<*DEFNU>
+% test syntax poly(IND) -> return point
+
+pts = [0 0; 10 0;10 10;0 10];
+poly = MultiPoint2D(pts);
+res = poly(2);
+assertTrue(testCase, isa(res, 'Point2D'));
+
+function test_subsref_s1_multi(testCase) %#ok<*DEFNU>
+% test syntax poly(INDS) -> return multi-point
+
+pts = [0 0; 10 0;10 10;0 10];
+poly = MultiPoint2D(pts);
+res = poly([2 3]);
+assertTrue(testCase, isa(res, 'MultiPoint2D'));
+
+function test_subsref_s2(testCase) %#ok<*DEFNU>
+% test syntax poly(S1, S2) -> return double array
+
+pts = [0 0; 10 0;10 10;0 10];
+poly = MultiPoint2D(pts);
+res = poly(1, 1);
+assertTrue(testCase, isnumeric(res));
+assertTrue(testCase, isscalar(res));
+
+res = poly([2 3], 1);
+assertTrue(testCase, isnumeric(res));
+assertEqual(testCase, size(res), [2 1]);
+
+res = poly([2 3], [1 2]);
+assertTrue(testCase, isnumeric(res));
+assertEqual(testCase, size(res), [2 2]);
+
+res = poly(:, 1);
+assertTrue(testCase, isnumeric(res));
+assertEqual(testCase, size(res), [4 1]);
+
+res = poly(2, :);
+assertTrue(testCase, isnumeric(res));
+assertEqual(testCase, size(res), [1 2]);
+
+res = poly(:, :);
+assertTrue(testCase, isnumeric(res));
+assertEqual(testCase, size(res), [4 2]);
+
+
+
 function test_Serialize(testCase)
 % Test call of function without argument
 

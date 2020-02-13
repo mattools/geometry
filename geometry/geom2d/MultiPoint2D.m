@@ -121,6 +121,7 @@ methods
     end
 end % end methods
 
+
 %% Serialization methods
 methods
     function str = toStruct(obj)
@@ -140,6 +141,7 @@ methods (Static)
         end
     end
 end
+
 
 %% sub-indexing methods
 methods
@@ -247,7 +249,6 @@ methods
             error('MultiPoint2D:subsref', ...
                 ['can not manage such reference: ' type]);
         end
-        
     end
 end
 

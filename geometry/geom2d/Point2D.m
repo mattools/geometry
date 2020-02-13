@@ -230,7 +230,6 @@ methods
             error('Point2D:subsref', ...
                 ['can not manage such reference: ' type]);
         end
-        
     end
 end
 

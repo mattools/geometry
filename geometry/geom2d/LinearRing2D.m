@@ -441,7 +441,6 @@ methods
             error('LinearRing2D:subsref', ...
                 ['can not manage such reference: ' type]);
         end
-        
     end
 end
 

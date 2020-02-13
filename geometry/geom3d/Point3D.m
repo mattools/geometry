@@ -142,4 +142,60 @@ methods (Static)
     end
 end
 
+%% sub-indexing methods
+methods
+    function varargout = subsref(obj, subs)
+        % Overrides subsref function for Point2D objects.
+        
+        % extract reference type
+        s1 = subs(1);
+        type = s1.type;
+        
+        % switch between reference types
+        if strcmp(type, '.')
+            % in case of dot reference, use builtin
+            
+            % check if we need to return output or not
+            if nargout > 0
+                % if some output arguments are asked, pre-allocate result
+                varargout = cell(nargout, 1);
+                [varargout{:}] = builtin('subsref', obj, subs);
+            else
+                % call parent function, and eventually return answer
+                builtin('subsref', obj, subs);
+                if exist('ans', 'var')
+                    varargout{1} = ans; %#ok<NOANS>
+                end
+            end
+            
+        elseif strcmp(type, '()')
+            % In case of parens reference, index the inner data
+            varargout{1} = 0;
+            
+            % different processing if 1 or 2 indices are used
+            ns = length(s1.subs);
+            if ns == 1
+                % use index as dimension
+                sub1 = s1.subs{1};
+                res = zeros(size(sub1));
+                res(sub1 == 1) = obj.X;
+                res(sub1 == 2) = obj.Y;
+                res(sub1 == 3) = obj.Z;
+                varargout{1} = res;
+                
+            else
+                error('Point3D:subsref', ...
+                    'Requires single indices.');
+            end
+            
+        elseif strcmp(type, '{}')
+            error('Point3D:subsref', ...
+                'can not manage braces reference');
+        else
+            error('Point3D:subsref', ...
+                ['can not manage such reference: ' type]);
+        end
+    end
+end
+
 end % end classdef
