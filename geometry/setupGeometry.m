@@ -22,15 +22,16 @@ libDir = fileparts(fileName);
 moduleNames = {...
     '.', ...
     'geom2d', ...
-    'geom3d'};
+    'geom3d', ...
+    'meshes3d'};
 
-disp('Installing Geometry Library');
+disp('Installing "Geometry" Library');
 addpath(libDir);
 
 % add all library modules
 for i = 1:length(moduleNames)
     name = moduleNames{i};
-    fprintf('Adding module: %-20s', name);
+    fprintf('  Adding module: %-20s', name);
     addpath(fullfile(libDir, name));
     disp(' (ok)');
 end
