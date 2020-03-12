@@ -18,10 +18,12 @@ classdef Sphere3D < Geometry3D
 
 %% Properties
 properties
-    XC = 0;
-    YC = 0;
-    ZC = 0;
-    R  = 1;
+    % The coordinates of the center.
+    Center = [0 0 0];
+    
+    % The radius of the sphere. Default is 1.
+    Radius  = 1;
+    
 end % end properties
 
 
@@ -33,17 +35,13 @@ methods
             var1 = varargin{1};
             if isa(var1, 'Sphere3D')
                 % copy constructor
-                obj.XC = var1.XC;
-                obj.YC = var1.YC;
-                obj.ZC = var1.ZC;
-                obj.R  = var1.R;
+                obj.Center = var1.Center;
+                obj.Radius  = var1.Radius;
                 
             elseif isnumeric(var1)
                 % initialize with a 1-by-4 row vector
-                obj.XC = var1(1);
-                obj.YC = var1(2);
-                obj.ZC = var1(3);
-                obj.R  = var1(4);
+                obj.Center = var1(1, 1:3);
+                obj.Radius  = var1(4);
             end
         elseif nargin == 2
             % center + radius
@@ -51,19 +49,15 @@ methods
             % initialize center
             var1 = varargin{1};
             if isa(var1, 'Point3D')
-                obj.XC = var1.X;
-                obj.YC = var1.Y;
-                obj.ZC = var1.Z;
+                obj.Center = [var1.X var1.Y var1.Z];
             elseif isnumeric(var1)
-                obj.XC = var1(1);
-                obj.YC = var1(2);
-                obj.ZC = var1(3);
+                obj.Center = var1(1, 1:3);
             else
                 error('Can not interpret first argument');
             end
             
             % initialize radius
-            obj.R = varargin{2};
+            obj.Radius = varargin{2};
             
         elseif nargin > 2
             error('Can not initialize sphere');
@@ -85,44 +79,43 @@ methods
         % Return the bounding box of this shape.
         
         box = Box3D([...
-            obj.XC - obj.R obj.XC + obj.R ...
-            obj.YC - obj.R obj.YC + obj.R ...
-            obj.ZC - obj.R obj.ZC + obj.R]);
+            obj.Center(1) - obj.Radius obj.Center(1) + obj.Radius ...
+            obj.Center(2) - obj.Radius obj.Center(2) + obj.Radius ...
+            obj.Center(3) - obj.Radius obj.Center(3) + obj.Radius]);
     end
     
     function h = draw(varargin)
-        %DRAW Draw this point, eventually specifying the style.
-
+        %DRAW Draw this sphere, eventually specifying the style.
+        
         % parse arguments using protected method implemented in Geometry
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
-        % defualt values for drawing
+        % default values for drawing
         nPhi    = 32;
         nTheta  = 16;
-
+        
         % process input options: when a string is found, assumes this is the
         % beginning of options
         options = {'FaceColor', 'g', 'LineStyle', 'none'};
         if length(varargin) == 1
             options = {'FaceColor', varargin{1}, 'LineStyle', 'none'};
-            varargin= {};
         else
             options = [options varargin];
         end
-
+        
         % compute spherical coordinates
         theta   = linspace(0, pi, nTheta+1);
         phi     = linspace(0, 2*pi, nPhi+1);
         
         % convert to cartesian coordinates
         sintheta = sin(theta);
-        x = obj.XC + cos(phi') * sintheta * obj.R;
-        y = obj.YC + sin(phi') * sintheta * obj.R;
-        z = obj.ZC + ones(length(phi),1) * cos(theta) * obj.R;
-
+        x = obj.Center(1) + cos(phi') * sintheta * obj.Radius;
+        y = obj.Center(2) + sin(phi') * sintheta * obj.Radius;
+        z = obj.Center(3) + ones(length(phi),1) * cos(theta) * obj.Radius;
+        
         % draw the geometric primitive
         hh = surf(ax, x, y, z, options{:});
-
+        
         % optionnally add style processing
         if ~isempty(style)
             apply(style, hh);
@@ -140,15 +133,19 @@ methods
     function res = scale(obj, varargin)
         % Return a scaled version of this geometry.
         factor = varargin{1};
-        center = [obj.XC obj.YC obj.ZC] * factor;
-        res = Sphere3D(center, obj.R * factor);
+        if ~isscalar(factor)
+            error('Requires scaling factor to be a scalar');
+        end
+        center = obj.Center * factor;
+        radius = obj.Radius * factor;
+        res = Sphere3D(center, radius);
     end
     
     function res = translate(obj, varargin)
         % Return a translated version of this geometry.
         shift = varargin{1};
-        center = [obj.XC obj.YC obj.ZC] + shift;
-        res = Sphere3D(center, obj.R);
+        center = obj.Center + shift;
+        res = Sphere3D(center, obj.Radius);
     end    
 end % end methods
 
@@ -157,13 +154,15 @@ end % end methods
 methods
     function str = toStruct(obj)
         % Convert to a structure to facilitate serialization.
-        str = struct('Type', 'Sphere3D', 'XC', obj.XC, 'YC', obj.YC, 'ZC', obj.ZC, 'R', obj.R);
+        str = struct('Type', 'Sphere3D', ...
+            'Center', obj.Center, ...
+            'Radius', obj.Radius);
     end
 end
 methods (Static)
-    function point = fromStruct(str)
+    function sphere = fromStruct(str)
         % Create a new instance from a structure.
-        point = Sphere3D([str.XC str.YC str.ZC str.R]);
+        sphere = Sphere3D(str.Center, str.Radius);
     end
 end
 
