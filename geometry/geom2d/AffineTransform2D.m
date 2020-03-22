@@ -128,6 +128,21 @@ methods
         pts2(:,2) = coeffs(4) * pts(:,1) + coeffs(5) * pts(:,2) + coeffs(6);
     end
     
+    function vect2 = transformVector(obj, vect)
+        %TRANSFORMVECTOR Apply this affine transform to a vector.
+        %
+        %   VECT2 = transformVector(T, VECT);
+        %   where T is the transformation object, and VECT is the vector to
+        %   transform, as a N-by-2 numeric array. 
+        %   The result is a N-by-2 numeric array containing the coordinates
+        %   of the transformed vector.
+        
+        % compute new position of vector
+        vect2 = zeros(size(vect));
+        vect2(:,1) = vect(:,1) * obj.Coeffs(1) + vect(:,2) * obj.Coeffs(2);
+        vect2(:,2) = vect(:,1) * obj.Coeffs(4) + vect(:,2) * obj.Coeffs(5);
+    end
+    
     function b = isIdentity(obj, varargin)
         if isempty(varargin)
             tol = 1e-10;

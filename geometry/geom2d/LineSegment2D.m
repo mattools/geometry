@@ -108,8 +108,14 @@ methods
         % compute distance between point and its projection on the edge
         dist = hypot(pos * vx - dx, pos * vy - dy);
     end
+    
+    function pm = middlePoint(obj)
+        % Return the middle point of this line segment.
+        xm = (obj.X1 + obj.X2) / 2;
+        ym = (obj.Y1 + obj.Y2) / 2;
+        pm = Point2D(xm, ym);
+    end
 end
-
 
 %% Methods generic to curve objects
 methods
@@ -131,7 +137,7 @@ methods
     end
     
     function p2 = lastPoint(obj)
-        % Return the last poitn of this line segment.
+        % Return the last point of this line segment.
         p2 = Point2D(obj.X2, obj.Y2);
     end
 end
