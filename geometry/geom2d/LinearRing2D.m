@@ -10,7 +10,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LinearRing2D < Curve2D
 %     draw(ring);
 %
 %   See also
-%     Geometry2D, LineString2D, Polygon2D
+%     Geometry2D, LineString2D, SimplePolygon2D
 
 % ------
 % Author: David Legland

@@ -10,9 +10,9 @@
  
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2018-08-29,    using Matlab 9.4.0.813654 (R2018a)
-% Copyright 2018 INRA - Cepia Software Platform.
+% Copyright 2018 INRAE - BIBS - Cepia Software Platform.
 
 
 %% Create polygon
@@ -21,7 +21,7 @@
 verts = [...
     10 60; 20 40; 30 40; 20 10; 70 40; 80 20; ...
     90 50; 60 80; 50 60; 40 80; 30 60];
-poly = Polygon2D(verts);
+poly = SimplePolygon2D(verts);
 
 % display polygon
 figure; hold on; 
