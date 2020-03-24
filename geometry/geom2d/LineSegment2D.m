@@ -22,15 +22,11 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineSegment2D < Curve2
 
 %% Properties
 properties
-    % The x-coordinate of the source point.
-    X1 = 0;
-    % The y-coordinate of the source point.
-    Y1 = 0;
+    % The coordinate of the source point, as a 1-by-2 numeric array.
+    P1 = [0 0];
 
-    % The x-coordinate of the target point.
-    X2 = 1;
-    % The y-coordinate of the target point.
-    Y2 = 0;
+    % The coordinate of the target point, as a 1-by-2 numeric array.
+    P2 = [1 0];
     
 end % end properties
 
@@ -38,7 +34,7 @@ end % end properties
 %% Constructor
 methods
     function obj = LineSegment2D(varargin)
-        % Constructor for LineSegment2D class
+        % Constructor for the LineSegment2D class.
         
         if nargin == 0
             % Default constructor: unit line segment
@@ -49,28 +45,22 @@ methods
                 error('Requires a LineSegment2D as input');
             end
             var1 = varargin{1};
-            obj.X1 = var1.X1;
-            obj.Y1 = var1.Y1;
-            obj.X2 = var1.X2;
-            obj.Y2 = var1.Y2;
+            obj.P1 = var1.P1;
+            obj.P2 = var1.P2;
             
         elseif nargin == 2
             p1 = varargin{1};
             if isa(p1, 'Point2D')
-                obj.X1 = p1.X;
-                obj.Y1 = p1.Y;
+                obj.P1 = [p1.X p1.Y];
             else
-                obj.X1 = p1(1);
-                obj.Y1 = p1(2);
+                obj.P1 = p1;
             end
               
             p2 = varargin{2};
             if isa(p2, 'Point2D')
-                obj.X2 = p2.X;
-                obj.Y2 = p2.Y;
+                obj.P2 = [p2.X p2.Y];
             else
-                obj.X2 = p2(1);
-                obj.Y2 = p2(2);
+                obj.P2 = p2;
             end
         end
 
@@ -85,15 +75,15 @@ methods
         % Minimum distance between point(s) and this line segment.
         
         % direction vector of the line segment
-        vx = obj.X2 - obj.X1;
-        vy = obj.Y2 - obj.Y1;
+        vx = obj.P2(1) - obj.P1(1);
+        vy = obj.P2(2) - obj.P1(2);
         
         % squared length of edges, with a check of validity
         delta = vx .* vx + vy .* vy;
         
         % difference of coordinates between points and first point
-        dx  = point(:, 1) - obj.X1;
-        dy  = point(:, 2) - obj.Y1;
+        dx  = point(:, 1) - obj.P1(1);
+        dy  = point(:, 2) - obj.P1(2);
         
         % compute position of points projected on the supporting line,
         % by using normalised dot product (NP-by-NE array)
@@ -111,8 +101,8 @@ methods
     
     function pm = middlePoint(obj)
         % Return the middle point of this line segment.
-        xm = (obj.X1 + obj.X2) / 2;
-        ym = (obj.Y1 + obj.Y2) / 2;
+        xm = mean(obj.P1);
+        ym = mean(obj.P2);
         pm = Point2D(xm, ym);
     end
 end
@@ -121,9 +111,9 @@ end
 methods
     function l = length(obj)
         % Return the length of this line segment.
-        dx = obj.X2 - obj.X1;
-        dy = obj.Y2 - obj.Y1;
-        l = sqrt(dx*dx + dy*dy);
+        dx = obj.P2(1) - obj.P1(1);
+        dy = obj.P2(2) - obj.P1(2);
+        l = hypot(dx, dy);
     end
     
     function res = reverse(obj)
@@ -133,12 +123,12 @@ methods
     
     function p1 = firstPoint(obj)
         % Return the first point of this line segment.
-        p1 = Point2D(obj.X1, obj.Y1);
+        p1 = Point2D(obj.P1);
     end
     
     function p2 = lastPoint(obj)
         % Return the last point of this line segment.
-        p2 = Point2D(obj.X2, obj.Y2);
+        p2 = Point2D(obj.P2);
     end
 end
 
@@ -171,8 +161,8 @@ methods
     
     function box = boundingBox(obj)
         % Returns the bounding box of this geometry.
-        x = sort([obj.X1 obj.X2]);
-        y = sort([obj.Y1 obj.Y2]);
+        x = sort([obj.P1(1) obj.P2(1)]);
+        y = sort([obj.P1(2) obj.P2(2)]);
         box = Box2D([x y]);
     end
     
@@ -183,8 +173,8 @@ methods
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % plot line segment
-        xdata = [obj.X1 obj.X2];
-        ydata = [obj.Y1 obj.Y2];
+        xdata = [obj.P1(1) obj.P2(1)];
+        ydata = [obj.P1(2) obj.P2(2)];
         hh = plot(ax, xdata, ydata, varargin{:});
         
         if ~isempty(style)
@@ -198,12 +188,12 @@ methods
     
     function res = scale(obj, factor)
         % Returns a scaled version of this line segment.
-        res = LineSegment2D([obj.X1 obj.Y1] * factor, [obj.X2 obj.Y2] * factor);
+        res = LineSegment2D(obj.P1 * factor, obj.P2 * factor);
     end
     
     function res = translate(obj, shift)
         % Returns a translated version of this line segment.
-        res = LineSegment3D([obj.X1 obj.Y1] + shift, [obj.X2 obj.Y2] + shift);
+        res = LineSegment3D(obj.P1 + shift, obj.P2 + shift);
     end
     
     function res = rotate(obj, varargin)
@@ -214,8 +204,8 @@ methods
         end
         
         rot = createRotation(origin, deg2rad(angle));
-        p1t = transformPoint(rot, [obj.X1 obj.Y1]);
-        p2t = transformPoint(rot, [obj.X2 obj.Y2]);
+        p1t = transformPoint(rot, obj.P1);
+        p2t = transformPoint(rot, obj.P2);
         
         res =  LineSegment2D(p1t, p2t);
     end
@@ -228,16 +218,14 @@ methods
     function str = toStruct(obj)
         % Convert to a structure to facilitate serialization.
         str = struct('Type', 'LineSegment2D', ...
-            'X1', obj.X1, 'Y1', obj.Y1, ...
-            'X2', obj.X2, 'Y2', obj.Y2);
+            'P1', obj.P1, ...
+            'P2', obj.P2);
     end
 end
 methods (Static)
     function line = fromStruct(str)
         % Create a new instance from a structure.
-        p1 = [str.X1 str.Y1];
-        p2 = [str.X2 str.Y2];
-        line = LineSegment2D(p1, p2);
+        line = LineSegment2D(str.P1, str.P2);
     end
 end
 
