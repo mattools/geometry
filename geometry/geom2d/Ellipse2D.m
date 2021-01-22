@@ -43,7 +43,7 @@ methods
             case 1
                 var1 = varargin{1};
                 if size(var1, 2) ~= 5
-                    error('Creating an ellipse requires an array with three columns, not %d', size(var1, 2));
+                    error('Creating an ellipse requires an array with five columns, not %d', size(var1, 2));
                 end
                 obj.CenterX = var1(1);
                 obj.CenterY = var1(2);
@@ -79,20 +79,20 @@ methods
         % create time basis
         t = linspace(0, 2*pi, N+1)';
         t(end) = [];
-
+        
         % angle of ellipse
-
+        
         % get ellipse parameters
         xc = obj.CenterX;
         yc = obj.CenterY;
         r1 = obj.Radius1;
         r2 = obj.Radius2;
         theta = obj.Orientation;
-
+        
         % pre-compute trig functions (angles is in degrees)
         cot = cosd(theta);
         sit = sind(theta);
-
+        
         % position of points
         x = xc + r1 * cos(t) * cot - r2 * sin(t) * sit;
         y = yc + r1 * cos(t) * sit + r2 * sin(t) * cot;
