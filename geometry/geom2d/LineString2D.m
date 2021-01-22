@@ -13,7 +13,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString2D < Curve2D
 %     draw(poly2, 'm');
 %
 %   See also
-%   Geometry2d, Polygon2D
+%     Geometry2d, Polygon2D
 
 % ------
 % Author: David Legland
@@ -24,7 +24,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString2D < Curve2D
 
 %% Properties
 properties
-    % the set of Coords, given as a N-by-2 array of double.
+    % The vertex coordinates, given as a N-by-2 array of double.
     Coords;
     
 end % end properties
@@ -205,7 +205,7 @@ methods
         
         % compute the cumulative  sum of the length of each line segment,
         % and add 0 for the first vertex.
-        al = [0 ; cumsum(sqrt(sum(diff(obj.Coords).^2, 2)))];
+        al = [0 ; cumsum(sqrt(sum(diff(obj.Coords, 1).^2, 2)))];
     end
 
     function nv = vertexNumber(obj)
@@ -229,6 +229,13 @@ methods
     end
 end
 
+%% Methods
+methods
+    function coords = vertexCoordinates(obj)
+        % Return the coordinates of vertices.
+        coords = obj.Coords;
+    end
+end
 
 %% Methods
 methods

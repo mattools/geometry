@@ -6,7 +6,9 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Polygon2D < Geometry2D
 %   Data are represented by a NV-by-2 array.
 %
 %   Example
-%   Polygon2D([0 0; 10 0; 10 10; 0 10]);
+%     % Create and draw a simple polygon
+%     poly = Polygon2D.create([0 10; 10 0; 20 10;10 20]);
+%     figure; draw(poly); axis equal;
 %
 %   See also
 %     Geometry2D, LinearRing2D
@@ -17,6 +19,12 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Polygon2D < Geometry2D
 % Created: 2018-08-14,    using Matlab 7.9.0.529 (R2009b)
 % Copyright 2013 INRA - Cepia Software Platform.
 
+methods (Static)
+    function poly = create(coords)
+        % Create a polygon from an array of vertex coordinates.
+        poly = SimplePolygon2D(coords);
+    end
+end
 
 %% Properties
 properties

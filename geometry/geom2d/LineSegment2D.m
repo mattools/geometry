@@ -1,7 +1,11 @@
 classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineSegment2D < Curve2D
 % A line segment defined by its two extremities.
 %
-%   Class LineSegment2D
+%   Usage
+%   L = LineSegment2D(P1, P2);
+%   Creates the line segment by specifying its two extremities. P1 and P2
+%   must be either instances of Point2D, or 1-by-2 numeric arrays
+%   containing coordinates of extremities. 
 %
 %   Example
 %     P1 = Point2D(20, 10);
@@ -52,15 +56,19 @@ methods
             p1 = varargin{1};
             if isa(p1, 'Point2D')
                 obj.P1 = [p1.X p1.Y];
-            else
+            elseif isnumeric(p1) && all(size(p1) == [1 2])
                 obj.P1 = p1;
+            else
+                error('Unable to interpret first input arument');
             end
               
             p2 = varargin{2};
             if isa(p2, 'Point2D')
                 obj.P2 = [p2.X p2.Y];
-            else
+            elseif isnumeric(p2) && all(size(p2) == [1 2])
                 obj.P2 = p2;
+            else
+                error('Unable to interpret second input arument');
             end
         end
 
