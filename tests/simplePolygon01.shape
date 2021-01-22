@@ -1,0 +1,17 @@
+{
+	"Style": {
+		"FaceVisible": 0,
+		"FaceColor": [0.75,0.75,0.75]
+	},
+	"Geometry": {
+		"Type": "Polygon2D",
+		"Coordinates": [
+			[10,10],
+			[30,10],
+			[30,20],
+			[20,20],
+			[20,30],
+			[10,30]
+		]
+	}
+}

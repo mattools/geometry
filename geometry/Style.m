@@ -27,7 +27,7 @@ classdef Style < handle
 %     % change style using Style class
 %     style1 = Style('LineWidth', 2, 'LineColor', 'g');
 %     apply(style1, h1)
-%     % chage vertex style
+%     % change vertex style
 %     hold on;
 %     h2 = drawPolygon(poly);
 %     style2 = Style('MarkerStyle', 's', 'MarkerColor', 'k', 'MarkerFillColor', 'w', 'MarkerVisible', true, 'LineVisible', false);
