@@ -1,4 +1,4 @@
-classdef Shape < handle
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Shape < handle
 % Contains information to draw a 2D or 3D shape.
 %
 %   The shape class encapsulates information about the Geometry of the
@@ -108,9 +108,25 @@ end % end constructors
 
 %% Methods
 methods
-    function varargout = draw(obj)
-        % Draws obj shape on the current axis
-        h = draw(obj.Geometry, obj.Style);
+    function varargout = draw(varargin)
+        % Draws this shape on the current axis.
+        
+        % identify the variable corresponding to class instance
+        ind = cellfun(@(x)isa(x, 'Shape'), varargin);
+        obj = varargin{ind};
+        
+        % extract handle of axis to draw on
+        % (similar method exists in Geometry class)
+        if ~isempty(varargin) && isscalar(varargin{1}) && ishghandle(varargin{1}) && strcmpi(get(varargin{1}, 'type'), 'axes')
+            ax = varargin{1};
+        else
+            ax = gca;
+        end
+        
+        % call the draw function from the Geometry bject
+        h = draw(ax, obj.Geometry, obj.Style);
+        
+        % format output argument
         if nargout > 0
             varargout = {h};
         end

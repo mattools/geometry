@@ -1,5 +1,5 @@
-classdef Box2D < handle
-% Bounding box of a planar shape.
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Box2D < Geometry2D
+% A rectangular region oriented with main axes.
 %
 %   Class Box2D
 %   Defined by max extent in each dimension:
@@ -65,20 +65,21 @@ methods
         box = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax]);
     end
     
-    function varargout = draw(obj, varargin)
+    function varargout = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        % extract style agument if present
-        style = [];
-        if nargin > 1 && isa(varargin{1}, 'Style')
-            style = varargin{1};
-            varargin(1) = [];
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+
+        % default drawing argument
+        if isempty(varargin)
+            varargin = {'b-'};
         end
         
         % draw the box
         tx = [obj.XMin obj.XMax obj.XMax obj.XMin obj.XMin];
         ty = [obj.YMin obj.YMin obj.YMax obj.YMax obj.YMin];
-        h = plot(tx, ty, varargin{:});
+        h = plot(ax, tx, ty, varargin{:});
         
         % eventually apply style
         if ~isempty(style)
@@ -92,7 +93,7 @@ methods
     end
     
     function res = scale(obj, varargin)
-        % Return a scaled version of obj geometry.
+        % Return a scaled version of this geometry.
         factor = varargin{1};
         res = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax] * factor);
     end
