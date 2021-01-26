@@ -1,4 +1,4 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LinearRing2D < Curve2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LinearRing2D < Polyline2D
 % A closed polyline in the plane.
 %
 %   Represents a linear ring defined be a series of Coords. 
@@ -144,15 +144,26 @@ methods
     end
 end
 
+%% Implementation of the Polyline2D interface
+methods
+    function c = isClosed(obj) %#ok<MANU>
+        c = true;
+    end
+end
 
 %% Methods or management of vertices
 methods
+    function coords = vertexCoordinates(obj)
+        % Return the coordinates of vertices.
+        coords = obj.Coords;
+    end
+    
     function verts = vertices(obj)
         % Return vertices as a new instance of MultiPoint2D.
         verts = MultiPoint2D(obj.Coords);
     end
     
-    function nv = vertexNumber(obj)
+    function nv = vertexCount(obj)
         % Get the number of vertices.
         nv = size(obj.Coords, 1);
     end
@@ -185,39 +196,6 @@ methods
         mini = min(obj.Coords);
         maxi = max(obj.Coords);
         box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
-    end
-    
-    function h = drawVertices(varargin)
-        % Draw vertices of this polyline, with optional drawing options.
-        
-        % parse arguments using protected method implemented in Geometry
-        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
-        holdState = ishold(ax);
-        hold(ax, 'on');
-        
-        % default options
-        if isempty(varargin)
-            varargin = {'Marker', 's', 'Color', 'k', 'LineStyle', 'none', 'MarkerFaceColor', 'w'};
-        end
-        
-        % extract data
-        xdata = obj.Coords(:,1);
-        ydata = obj.Coords(:,2);
-        
-        hh = plot(ax, xdata, ydata, varargin{:});
-        if ~isempty(style)
-            apply(style, hh);
-        end
-        
-        if holdState
-            hold(ax, 'on');
-        else
-            hold(ax, 'off');
-        end
-        
-        if nargout > 0
-            h = hh;
-        end
     end
     
     function h = draw(varargin)

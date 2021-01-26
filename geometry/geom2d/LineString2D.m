@@ -1,4 +1,4 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString2D < Curve2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineString2D < Polyline2D
 % An open polyline composed of several line segments. 
 %
 %   Represents a polyline defined be a series of vertex coordinates. 
@@ -200,6 +200,11 @@ end
 
 %% Methods or management of vertices
 methods
+    function coords = vertexCoordinates(obj)
+        % Return the coordinates of vertices.
+        coords = obj.Coords;
+    end
+    
     function al = verticesArcLength(obj)
         % Return the arc length at each vertex of the polyline.
         
@@ -208,9 +213,16 @@ methods
         al = [0 ; cumsum(sqrt(sum(diff(obj.Coords, 1).^2, 2)))];
     end
 
-    function nv = vertexNumber(obj)
+    function nv = vertexCount(obj)
         % Get the number of vertices.
         nv = size(obj.Coords, 1);
+    end
+end
+
+%% Implementation of the Polyline2D interface
+methods
+    function c = isClosed(obj) %#ok<MANU>
+        c = false;
     end
 end
 
@@ -229,64 +241,12 @@ methods
     end
 end
 
-%% Methods
-methods
-    function coords = vertexCoordinates(obj)
-        % Return the coordinates of vertices.
-        coords = obj.Coords;
-    end
-end
 
 %% Methods
 methods
     function res = transform(obj, transform)
         % Apply a geometric transform to this polyline.
         res = LineString2D(transformPoint(transform, obj.Coords));
-    end
-    
-    function box = boundingBox(obj)
-        % Return the bounding box of this polyline.
-        mini = min(obj.Coords);
-        maxi = max(obj.Coords);
-        box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
-    end
-    
-    function verts = vertices(obj)
-        % Get the vertices as a new instance of MultiPoint2D.
-        verts = MultiPoint2D(obj.Coords);
-    end
-    
-    function h = drawVertices(varargin)
-        % Draw vertices of this polyline, with optional drawing options.
-        
-        % parse arguments using protected method implemented in Geometry
-        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
-        holdState = ishold(ax);
-        hold(ax, 'on');
-        
-        % default options
-        if isempty(varargin)
-            varargin = {'Marker', 's', 'Color', 'k', 'LineStyle', 'none'};
-        end
-        
-        % extract data
-        xdata = obj.Coords(:,1);
-        ydata = obj.Coords(:,2);
-        
-        hh = plot(ax, xdata, ydata, varargin{:});
-        if ~isempty(style)
-            apply(style, hh);
-        end
-        
-        if holdState
-            hold(ax, 'on');
-        else
-            hold(ax, 'off');
-        end
-        
-        if nargout > 0
-            h = hh;
-        end
     end
     
     function h = draw(varargin)

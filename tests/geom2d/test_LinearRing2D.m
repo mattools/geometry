@@ -24,6 +24,7 @@ pts = [0 0; 10 0;10 10;0 10];
 poly = LinearRing2D(pts);
 
 assertTrue(testCase, isa(poly, 'LinearRing2D'));
+assertTrue(testCase, isa(poly, 'Polyline2D'));
 
 
 function test_subsref_s1_scalar(testCase) %#ok<*DEFNU>
@@ -90,6 +91,6 @@ poly = LinearRing2D([xt yt]);
 
 poly2 = simplify(poly, .2);
 
-assertTrue(testCase, vertexNumber(poly2) < 10);
+assertTrue(testCase, vertexCount(poly2) < 10);
 
 assertEqual(testCase, poly2.Coords(1,:), [xt(1) yt(1)], 'AbsTol', 0.01);

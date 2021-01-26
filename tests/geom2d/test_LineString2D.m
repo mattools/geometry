@@ -25,6 +25,7 @@ pts = [0 0; 10 0;10 10;0 10];
 poly = LineString2D(pts);
 
 assertTrue(testCase, isa(poly, 'LineString2D'));
+assertTrue(testCase, isa(poly, 'Polyline2D'));
 
 
 function test_subsref_s1_scalar(testCase) %#ok<*DEFNU>
@@ -92,7 +93,7 @@ poly = LineString2D([xt yt]);
 
 poly2 = simplify(poly, .2);
 
-assertTrue(testCase, vertexNumber(poly2) < 10);
+assertTrue(testCase, vertexCount(poly2) < 10);
 
 assertEqual(testCase, poly2.Coords(1,:), [xt(1) yt(1)], 'AbsTol', 0.01);
 assertEqual(testCase, poly2.Coords(end,:), [xt(end) yt(end)], 'AbsTol', 0.01);
