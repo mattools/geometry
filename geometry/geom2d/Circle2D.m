@@ -90,11 +90,11 @@ methods
         error('Transform not implemented for Circles');
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this geometry.
         extX = [obj.CenterX - obj.Radius obj.CenterX + obj.Radius];
         extY = [obj.CenterY - obj.Radius obj.CenterY + obj.Radius];
-        box = Box2D([extX extY]);
+        box = Bounds2D([extX extY]);
     end
     
     function h = draw(varargin)

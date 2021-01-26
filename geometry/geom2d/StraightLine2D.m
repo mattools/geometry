@@ -5,7 +5,7 @@ classdef StraightLine2D < Geometry2D
 %
 %   Example
 %     P1 = Point2D([40 10]);
-%     P1 = Point2D([20 40]);
+%     P2 = Point2D([20 40]);
 %     L = StraightLine2D(P1, P2);
 %     figure; axis equal;axis([0 50 0 50]; holdon;
 %     draw(L);
@@ -218,9 +218,8 @@ end
 
 %% Methods implementing the Geometry2D interface
 methods
-    function box = boundingBox(obj) %#ok<STOUT,MANU>
-        % Return the bounding box of this geometry.
-        error('Straight line is not a bounded geometry.');
+    function bnd = bounds(obj) %#ok<MANU>
+        bnd = Bounds2D([-inf inf -inf inf]);
     end
     
     function h = draw(varargin)

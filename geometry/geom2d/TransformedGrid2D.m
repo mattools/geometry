@@ -76,13 +76,12 @@ methods
         error('Transform not implemented for TransformedGrid objects');
     end
     
-    function box = boundingBox(obj)
-        % Returns the bounding box of this geometry.
+    function box = bounds(obj)
         [x, y] = meshgrid(obj.XVertices, obj.YVertices);
         coordsT = transformPoint(obj.Transform, [x(:) y(:)]);
         x2 = coordsT(:,1);
         y2 = coordsT(:,2);
-        box = Box2D([min(x2(:)) max(x2(:)) min(y2(:)) max(y2(:))]);
+        box = Bounds2D([min(x2(:)) max(x2(:)) min(y2(:)) max(y2(:))]);
     end
 
     function h = draw(varargin)

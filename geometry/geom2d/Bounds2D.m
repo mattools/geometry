@@ -1,12 +1,12 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Box2D < Geometry2D
-% A rectangular region oriented with main axes.
+classdef Bounds2D < handle
+% The bounds of a planar shape in each direction.
 %
-%   Class Box2D
+%   Class Bounds2D
 %   Defined by max extent in each dimension:
 %   * XMin, XMax, YMin, YMax.
 %
 %   Example
-%     box = Box2D([5 15 6 14]);
+%     box = Bounds2D([5 15 6 14]);
 %     figure; axis([0 20 0 20]); hold on
 %     draw(box, 'b')
 %
@@ -32,16 +32,16 @@ end % end properties
 
 %% Constructor
 methods
-    function obj = Box2D(varargin)
-        % Constructor for Box2D class.
+    function obj = Bounds2D(varargin)
+        % Constructor for Bounds2D class.
     
         if ~isempty(varargin)
             var1 = varargin{1};
             if size(var1, 1) ~= 1
-                error('Creating a box requires an array with one row, not %d', size(var1, 1));
+                error('Creating Bounds2D requires an array with one row, not %d', size(var1, 1));
             end
             if size(var1, 2) ~= 4
-                error('Creating a box requires an array with four columns, not %d', size(var1, 2));
+                error('Creating Bounds2D requires an array with four columns, not %d', size(var1, 2));
             end
             data = var1;
         else
@@ -60,26 +60,24 @@ end % end constructors
 
 %% Methods
 methods
-    function box = bounds(obj)
-        % Return the bounding box of this shape.
-        box = Bounds2D([obj.XMin obj.XMax obj.YMin obj.YMax]);
+    function b = isFinite(obj)
+        b = all(isfinite([obj.XMin obj.XMax  obj.YMin obj.YMax]));
     end
     
-    function varargout = draw(varargin)
+    function varargout = draw(obj, varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
-        % parse arguments using protected method implemented in Geometry
-        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
-
-        % default drawing argument
-        if isempty(varargin)
-            varargin = {'b-'};
+        % extract style agument if present
+        style = [];
+        if nargin > 1 && isa(varargin{1}, 'Style')
+            style = varargin{1};
+            varargin(1) = [];
         end
         
         % draw the box
         tx = [obj.XMin obj.XMax obj.XMax obj.XMin obj.XMin];
         ty = [obj.YMin obj.YMin obj.YMax obj.YMax obj.YMin];
-        h = plot(ax, tx, ty, varargin{:});
+        h = plot(tx, ty, varargin{:});
         
         % eventually apply style
         if ~isempty(style)
@@ -90,24 +88,6 @@ methods
         if nargout > 0
             varargout = {h};
         end
-    end
-    
-    function res = scale(obj, varargin)
-        % Return a scaled version of this geometry.
-        factor = varargin{1};
-        res = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax] * factor);
-    end
-    
-    function res = translate(obj, varargin)
-        % Return a translated version of obj geometry.
-        shift = varargin{1};
-        data2 = [obj.XMin obj.XMax obj.YMin obj.YMax] + shift(1, [1 1 2 2]);
-        res = Box2D(data2);
-    end
-    
-    function res = rotate(obj, angle) %#ok<STOUT,INUSD>
-        % Throw an error as a box can not be rotated.
-        error('A box can not be rotated');
     end
 end % end methods
 
@@ -128,7 +108,7 @@ methods
     
     function str = toStruct(obj)
         % Convert to a structure to facilitate serialization.
-        str = struct('type', 'Box2D', ...
+        str = struct('type', 'Bounds2D', ...
             'XMin', obj.XMin, 'XMax', obj.XMax, ...
             'YMin', obj.YMin, 'YMax', obj.YMax);
     end
@@ -140,12 +120,12 @@ methods (Static)
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end
-        box = Box2D.fromStruct(loadjson(fileName));
+        box = Bounds2D.fromStruct(loadjson(fileName));
     end
     
     function box = fromStruct(str)
         % Create a new instance from a structure.
-        box = Box2D([str.XMin str.XMax str.YMin str.YMax]);
+        box = Bounds2D([str.XMin str.XMax str.YMin str.YMax]);
     end
 end
 

@@ -81,7 +81,7 @@ methods
         res = MultiCurve2D(curves);
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this geometry.
         mini = [inf inf];
         maxi = [-inf -inf];
@@ -90,7 +90,7 @@ methods
             mini = min(mini, [boxi.XMin boxi.YMin]);
             maxi = max(maxi, [boxi.XMax boxi.YMax]);
         end
-        box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
+        box = Bounds2D([mini(1) maxi(1) mini(2) maxi(2)]);
     end
     
     function h = draw(varargin)

@@ -152,11 +152,11 @@ methods
         res = SimplePolygon2D(transformPoint(transfo, obj.Coords));
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this polygon.
         mini = min(obj.Coords);
         maxi = max(obj.Coords);
-        box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
+        box = Bounds2D([mini(1) maxi(1) mini(2) maxi(2)]);
     end
     
     function h = draw(varargin)

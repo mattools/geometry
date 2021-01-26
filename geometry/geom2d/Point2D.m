@@ -91,9 +91,9 @@ end
 
 %% Methods implementing the Geometry2D interface
 methods
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this shape.
-        box = Box2D([obj.X obj.X obj.Y obj.Y]);
+        box = Bounds2D([obj.X obj.X obj.Y obj.Y]);
     end
     
     function h = draw(varargin)

@@ -7,7 +7,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Curve2D < Geometry2D
 %   Curve2D
 %
 %   See also
-%     LineSegment2D, Circle2D, Ellipse2D, PolyLine2D
+%     LineSegment2D, Circle2D, Ellipse2D, Polyline2D
 %
 
 % ------

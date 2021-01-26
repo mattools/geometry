@@ -167,11 +167,11 @@ methods
         res = LineSegment2D(p1t, p2t);
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Returns the bounding box of this geometry.
         x = sort([obj.P1(1) obj.P2(1)]);
         y = sort([obj.P1(2) obj.P2(2)]);
-        box = Box2D([x y]);
+        box = Bounds2D([x y]);
     end
     
     function h = draw(varargin)

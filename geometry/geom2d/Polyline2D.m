@@ -69,15 +69,6 @@ end % end constructors
 
 %% Methods
 methods
-        
-    function box = boundingBox(obj)
-        % Return the bounding box of this polyline.
-        coords = vertexCoordinates(obj);
-        mini = min(coords);
-        maxi = max(coords);
-        box = Box2D([mini(1) maxi(1) mini(2) maxi(2)]);
-    end
-    
     function verts = vertices(obj)
         % Get the vertices as a new instance of MultiPoint2D.
         verts = MultiPoint2D(vertexCoordinates(obj));

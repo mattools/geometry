@@ -28,12 +28,6 @@ end % end constructors
 
 %% Protected methods for general use
 methods (Access = protected)
-    function [ax, obj, style, varargin] = parseDrawOptions(varargin)
-        warning('Method ''parseDrawOptions'' is deprecated, use ''parseDrawInputArguments'' instead');
-        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
-    end
-    
-    
     function [ax, obj, style, varargin] = parseDrawInputArguments(varargin)
         % Return the different elements necessary to draw the object.
         %

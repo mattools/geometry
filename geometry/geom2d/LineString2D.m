@@ -249,6 +249,14 @@ methods
         res = LineString2D(transformPoint(transform, obj.Coords));
     end
     
+    function box = bounds(obj)
+        % Return the bounding box of this polyline.
+        coords = vertexCoordinates(obj);
+        mini = min(coords);
+        maxi = max(coords);
+        box = Bounds2D([mini(1) maxi(1) mini(2) maxi(2)]);
+    end
+    
     function h = draw(varargin)
         %DRAW Draw the current geometry, eventually specifying the style.
         
@@ -339,7 +347,9 @@ methods
         
         res = LineString2D(verts);
     end
+
 end % end methods
+
 
 %% Serialization methods
 methods

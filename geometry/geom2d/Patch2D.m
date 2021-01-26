@@ -116,13 +116,13 @@ methods
         res = Patch2D(reshape(pts(:,1), dims), reshape(pts(:,2), dims));
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this patch.
         xmin = min(obj.X(:));
         xmax = max(obj.X(:));
         ymin = min(obj.Y(:));
         ymax = max(obj.Y(:));
-        box = Box2D([xmin xmax ymin ymax]);
+        box = Bounds2D([xmin xmax ymin ymax]);
     end    
 
     function h = draw(varargin)
