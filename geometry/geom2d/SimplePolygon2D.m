@@ -1,10 +1,10 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) SimplePolygon2D < Geometry2D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) SimplePolygon2D < Polygon2D
 % A simply-connected polygon in the plane.
 %
-%   Represents a polygon defined be a series of Coords. Its boundary is a
+%   Represents a polygon defined by a series of Coords. Its boundary is a
 %   linear ring.
 %
-%   Data are represented by a NV-by-2 array.
+%   Data are stored as a NV-by-2 array.
 %
 %   Example
 %     data = [10 10; 30 10; 30 20; 20 20; 20 30; 10 30];
@@ -13,7 +13,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) SimplePolygon2D < Geom
 %     draw(poly, 'DrawVertices', true);
 % 
 %   See also
-%     Geometry2D, LinearRing2D
+%     Polygon2D, LinearRing2D
 
 % ------
 % Author: David Legland
@@ -24,7 +24,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) SimplePolygon2D < Geom
 
 %% Properties
 properties
-    % The set of vertex coordinates, given as a N-by-2 array of double.
+    % The set of vertex coordinates, as a N-by-2 array of double.
     Coords;
     
 end % end properties
@@ -74,6 +74,8 @@ end % end constructors
 methods
     function centro = centroid(obj)
         % Compute the centroid of this polygon.
+        %
+        % Return the result as a point.
         
         % isolate coordinates
         px = obj.Coords(:,1);
@@ -114,21 +116,34 @@ methods
         p = sum(hypot(dp(:, 1), dp(:, 2)));
     end
     
+
+end
+
+
+%% Implementation of the Polygon2D interface
+methods
     function verts = vertices(obj)
-        % Return vertices as a new instance of MultiPoint2D.
         verts = MultiPoint2D(obj.Coords);
     end
-
+    
+    function nv = vertexCount(obj)
+        nv = size(obj.Coords, 1);
+    end
+    
+    function coords = vertexCoordinates(obj)
+        coords = obj.Coords;
+    end
 end
 
-%% Methods considering the Polygonas a domain
+
+%% Methods considering the Polygon as a domain
 methods
     function bnd = boundary(obj)
-        % Return the boundary of this polygon as a LineaRing2D.
+        % Return the boundary of this polygon as a LinearRing2D.
         bnd = LinearRing2D(obj.Coords);
     end
-
 end
+
 
 %% Methods implementing the Geometry2D interface
 methods
@@ -256,6 +271,7 @@ methods
         res = SimplePolygon2D(verts);
     end
 end % end methods
+
 
 %% Serialization methods
 methods

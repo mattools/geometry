@@ -17,41 +17,13 @@ function tests = test_Polygon2D(varargin)
 
 tests = functiontests(localfunctions);
 
-function test_Constructor(testCase) %#ok<*DEFNU>
-% Test call of function without argument
+
+function test_create(testCase) %#ok<*DEFNU>
+% Test 'create' static factory method
 
 vertices = [10 10; 20 10; 20 20; 10 20];
-poly = Polygon2D(vertices);
-assertEqual(testCase, 4, size(poly.Coords, 1));
 
-function test_perimeter_square(testCase) %#ok<*DEFNU>
-% Test call of function without argument
+poly = Polygon2D.create(vertices);
 
-vertices = [10 10; 20 10; 20 20; 10 20];
-poly = Polygon2D(vertices);
-exp = 40;
-
-perim = perimeter(poly);
-
-assertEqual(testCase, perim, exp, 'AbsTol', .01);
-
-function test_area_square(testCase) %#ok<*DEFNU>
-% Test call of function without argument
-
-vertices = [10 10; 20 10; 20 20; 10 20];
-poly = Polygon2D(vertices);
-exp = 100;
-
-a = area(poly);
-
-assertEqual(testCase, a, exp, 'AbsTol', .01);
-
-function test_transform(testCase) 
-
-vertices = [10 10; 20 10; 20 20; 10 20];
-poly = Polygon2D(vertices);
-trans = AffineTransform2D.createRotation(pi/3);
-poly2 = transform(poly, trans);
-
-assertTrue(testCase, isa(poly2, 'Polygon2D'));
-
+assertTrue(testCase, isa(poly, 'Polygon2D'));
+assertEqual(testCase, size(vertexCoordinates(poly), 1), 4);

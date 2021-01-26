@@ -1,7 +1,6 @@
 classdef  (InferiorClasses = {?matlab.graphics.axis.Axes}) Polyline2D < Curve2D
 % Abstract class for polyline geometries.
 %
-%
 %   The Polyline2D is an abstract class for all geometries that can be
 %   represented by a continuous set of 2D line segments. The two main
 %   implementations are LineString2D (for open polylines) and LinearRing2D
