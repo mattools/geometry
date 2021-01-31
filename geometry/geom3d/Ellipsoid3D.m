@@ -111,13 +111,13 @@ methods
         error('Method not implemented');
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this shape.
 
         nPhi    = 32;
         nTheta  = 16;
         [x, y, z] = surfaceVertices(obj, nPhi, nTheta);
-        box = Box3D([min(x(:)) max(x(:)) min(y(:)) max(y(:)) min(z(:)) max(z(:))]);
+        box = Bounds3D([min(x(:)) max(x(:)) min(y(:)) max(y(:)) min(z(:)) max(z(:))]);
     end
     
     function h = draw(varargin)

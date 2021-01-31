@@ -122,11 +122,11 @@ end
 
 %% Methods
 methods
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this shape.
         mini = min(obj.Coords);
         maxi = max(obj.Coords);
-        box = Box3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
+        box = Bounds3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
     end
     
     function varargout = draw(varargin)

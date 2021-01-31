@@ -17,6 +17,7 @@ function tests = test_Ellipsoid3D
 
 tests = functiontests(localfunctions);
 
+
 function test_Constructor_TwoArgs(testCase) %#ok<*DEFNU>
 % Test call of function without argument
 
@@ -28,6 +29,16 @@ assertEqual(testCase, E.Center(3), 10);
 assertEqual(testCase, E.Radius(1), 5);
 assertEqual(testCase, E.Radius(2), 3);
 assertEqual(testCase, E.Radius(3), 1);
+
+
+function test_bounds(testCase)
+
+E = Ellipsoid3D([30 20 10   5 3 1  30 20 10]);
+
+bnd = bounds(E);
+
+assertTrue(testCase, isa(bnd, 'Bounds3D'));
+assertTrue(testCase, isFinite(bnd));
 
 
 function test_Serialize(testCase)

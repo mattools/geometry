@@ -35,12 +35,11 @@ end % end constructors
 %% Abstract Methods
 % Declares some methods that will be implemented by subclasses.
 methods ( Abstract )
+    % Return the 3D bounds of this geometry, as a Bounds3D
+    box = bounds(obj)
     
-    box = boundingBox(obj)
-    % Return the 3D bounding box of this geometry.
-    
-    varargout = draw(obj, varargin)
     %DRAW Draw the current geometry, eventually specifying the style.
+    varargout = draw(obj, varargin)
 end
 
 %% Abstract Methods

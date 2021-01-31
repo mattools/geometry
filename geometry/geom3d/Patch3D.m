@@ -121,7 +121,7 @@ end
 
 %% Methods implementing the Geometry3D interface
 methods
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this shape.
         xmin = min(obj.X(:));
         xmax = max(obj.X(:));
@@ -129,7 +129,7 @@ methods
         ymax = max(obj.Y(:));
         zmin = min(obj.Z(:));
         zmax = max(obj.Z(:));
-        box = Box3D([xmin xmax ymin ymax zmin zmax]);
+        box = Bounds3D([xmin xmax ymin ymax zmin zmax]);
     end    
 
     function h = draw(varargin)

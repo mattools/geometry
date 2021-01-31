@@ -121,12 +121,12 @@ methods
         res = LineSegment3D(p1t, p2t);
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Returns the bounding box of this geometry.
         x = sort([obj.X1 obj.X2]);
         y = sort([obj.Y1 obj.Y2]);
         z = sort([obj.Z1 obj.Z2]);
-        box = Box3D([x y z]);
+        box = Bounds3D([x y z]);
     end
     
     function h = draw(varargin)

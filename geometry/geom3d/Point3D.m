@@ -86,9 +86,9 @@ methods
         res = Point3D(transformPoint(transform, [obj.X obj.Y obj.Z]));
     end
     
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this shape.
-        box = Box3D([obj.X obj.X obj.Y obj.Y obj.Z obj.Z]);
+        box = Bounds3D([obj.X obj.X obj.Y obj.Y obj.Z obj.Z]);
     end
     
     function h = draw(varargin)

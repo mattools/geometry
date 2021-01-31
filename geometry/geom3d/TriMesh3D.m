@@ -507,11 +507,11 @@ end
 
 %% Methods implementing Geometry3D
 methods
-    function box = boundingBox(obj)
+    function box = bounds(obj)
         % Return the bounding box of this mesh.
         mini = min(obj.Vertices);
         maxi = max(obj.Vertices);
-        box = Box3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
+        box = Bounds3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
     end
     
     function h = draw(varargin)
