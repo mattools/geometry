@@ -33,6 +33,43 @@ trans = AffineTransform2D.createRotation(pi/3);
 assertTrue(testCase, isa(trans, 'AffineTransform2D'));
 
 
+function test_createRotation90(testCase)
+
+p = Point2D([20 0]);
+trans = AffineTransform2D.createRotation90(1);
+
+p2 = transform(p, trans);
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X,  0, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 20, 'AbsTol', 0.01);
+
+
+function test_createRotation90_centerCoords(testCase)
+
+p = Point2D([15 20]);
+trans = AffineTransform2D.createRotation90(1, [10 20]);
+
+p2 = transform(p, trans);
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X, 10, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 25, 'AbsTol', 0.01);
+
+
+function test_createRotation90_centerPoint(testCase)
+
+p = Point2D([15 20]);
+trans = AffineTransform2D.createRotation90(1, Point2D(10, 20));
+
+p2 = transform(p, trans);
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X, 10, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 25, 'AbsTol', 0.01);
+
+
+
 function test_isIdentity_true(testCase) 
 trans = AffineTransform2D();
 assertTrue(testCase, isIdentity(trans));

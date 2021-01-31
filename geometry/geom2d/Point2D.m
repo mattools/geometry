@@ -144,18 +144,14 @@ methods
         %
         % PT2 = rotate(PT, THETA)
         % PT2 = rotate(PT, THETA, CENTER)
-        % THETA is given in degrees, in counter-clockwise order.
+        % THETA is given in radians, in counter-clockwise order.
         
-        origin = [0 0];
-        if ~isempty(varargin)
-            origin = varargin{1};
-        end
+        % transform point coords by creating an AffineTransform2D instance
+        rot = AffineTransform2D.createRotation(angle, varargin{:});
+        coords = transformPoint(rot, [obj.X obj.Y]);
         
-        % TODO: replace by AffineTransform2D instance
-        rot = createRotation(origin, deg2rad(angle));
-        verts = transformPoint([obj.X obj.Y], rot);
-        
-        res = Point2D(verts);
+        % create Point
+        res = Point2D(coords);
     end
     
     function res = uminus(obj)

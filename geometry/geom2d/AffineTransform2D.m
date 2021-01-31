@@ -56,13 +56,69 @@ methods (Static)
         obj = AffineTransform2D([1 0 dx 0 1 dy]);
     end
     
-    function obj = createRotation(theta)
+    function obj = createRotation(theta, varargin)
         % Create a new affine transform representing a rotation.
         %
-        % trans = AffineTransform2D.createRotation(angleInRadians)
+        %   T = AffineTransform2D.createRotation(THETA)
+        %   THETA is the rotation angle in radians.
+        %
+        %   T = AffineTransform2D.createRotation(THETA, CENTER)
+        %   Also specifies the rotation center, as a 1-by-2 row vector or
+        %   as a Point2D.
+        %
+        %   See also
+        %     createTranslation, createScaling
+        %
+        
+        % parse optional center
+        center = AffineTransform2D.parseCenter(varargin{:});
+        
+        % pre-compute trigonometric factors
         cot = cos(theta);
         sit = sin(theta);
-        obj = AffineTransform2D([cot -sit 0 sit cot 0]);
+        
+        % compute translation coefficients
+        tx = 0;
+        ty = 0;
+        if any(center ~= 0)
+            tx =  center(2)*sit - center(1)*cot + center(1);
+            ty = -center(2)*cot - center(1)*sit + center(2);
+        end
+        
+        % create the affine transform from coefficients
+        obj = AffineTransform2D([cot -sit tx  sit cot ty]);
+    end
+    
+    function obj = createRotation90(nRots, varargin)
+        % Create a rotation by a mulitple of 90 degrees.
+        %
+        %   trans = AffineTransform2D.createRotation(NROT)
+        %
+        %   See aslo
+        %     createTranslation, createScaling
+        %
+        
+        % parse optional center
+        center = AffineTransform2D.parseCenter(varargin{:});
+        
+        % pre-compute trigonometric factors
+        switch mod(nRots, 4)
+            case 0, cot = +1; sit =  0;
+            case 1, cot =  0; sit = +1;
+            case 2, cot = -1; sit =  0;
+            case 3, cot =  0; sit = -1;
+        end
+        
+        % compute translation coefficients
+        tx = 0;
+        ty = 0;
+        if any(center ~= 0)
+            tx =  center(2)*sit - center(1)*cot + center(1);
+            ty = -center(2)*cot - center(1)*sit + center(2);
+        end
+        
+        % create the affine transform from coefficients
+        obj = AffineTransform2D([cot -sit tx  sit cot ty]);
     end
     
     function obj = createScaling(factor)
@@ -86,6 +142,23 @@ methods (Static)
     end
 end
 
+methods (Static, Access = private)
+    function [center, varargin] = parseCenter(varargin)
+        % parse center.
+        center = [0 0];
+        if ~isempty(varargin)
+            var1 = varargin{1};
+            if isnumeric(var1) && all(size(var1) == [1 2])
+                center = var1;
+                varargin(1) = [];
+            elseif isa(var1, 'Point2D')
+                center = [var1.X var1.Y];
+                varargin(1) = [];
+            end
+        end
+
+    end
+end
 
 %% Constructor
 methods

@@ -32,6 +32,39 @@ assertEqual(testCase, 3, p(1));
 assertEqual(testCase, 4, p(2));
 
 
+function test_rotate(testCase)
+
+p = Point2D([10 0]);
+
+p2 = rotate(p, pi/2);
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X,  0, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 10, 'AbsTol', 0.01);
+
+
+function test_rotate_centerCoords(testCase)
+
+p = Point2D([15 20]);
+
+p2 = rotate(p, pi/2, [10 20]);
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X, 10, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 25, 'AbsTol', 0.01);
+
+
+function test_rotate_centerPoint(testCase)
+
+p = Point2D([15 20]);
+
+p2 = rotate(p, pi/2, Point2D(10, 20));
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X, 10, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 25, 'AbsTol', 0.01);
+
+
 function test_Serialize(testCase)
 % Test call of function without argument
 
