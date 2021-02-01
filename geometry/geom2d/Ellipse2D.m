@@ -59,7 +59,7 @@ end % end constructors
 %% Methods specific to Ellipse2D
 methods
     function center = center(obj)
-        % returns the center of this circle as a Point2D.
+        % Return the center of this circle as a Point2D.
         center = Point2D(obj.CenterX, obj.CenterY);
     end
     
@@ -68,7 +68,6 @@ methods
         %
         % POLY = asPolyline(OBJ);
         % Returns the result as an instance of LinearRing2D.
-        
         
         % determines number of points
         N = 72;
@@ -79,8 +78,6 @@ methods
         % create time basis
         t = linspace(0, 2*pi, N+1)';
         t(end) = [];
-        
-        % angle of ellipse
         
         % get ellipse parameters
         xc = obj.CenterX;
@@ -169,11 +166,19 @@ methods
         %
         % POLY2 = rotate(POLY, THETA)
         % POLY2 = rotate(POLY, THETA, CENTER)
-        % THETA is given in degrees, in counter-clockwise order.
+        % THETA is given in radians, in counter-clockwise order.
+        %
+        % Example
+        %   elli = Ellipse2D([40 20 25 15 0]);
+        %   elli2 = elli.rotate(pi/4);
+        %   figure; hold on; axis equal; axis([0 80 0 60]);
+        %   draw(elli, 'b'); draw(elli.center(), 'bo');
+        %   draw(elli2, 'm'); draw(elli2.center(), 'mo');
         
-        error('Not yet implemented...');
-%         center2 = rotate(center(obj), angle, varargin{:});
-%         res = Circle2D([center2.X center2.Y obj.Radius]);
+        transfo = AffineTransform2D.createRotation(angle, varargin{:});
+        center2 = transfo.transformPoint([obj.CenterX obj.CenterY]);
+        orientation2 = obj.Orientation + rad2deg(angle);
+        res = Ellipse2D([center2  obj.Radius1 obj.Radius2 orientation2]);
     end
 end % end methods
 

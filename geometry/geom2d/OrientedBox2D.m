@@ -63,16 +63,20 @@ methods
         % POLY = asPolyline(OBJ);
         % Returns the result as an instance of LinearRing2D.
         
-          % easier to compute with w and h divided by 2
+        % easier to compute with w and h divided by 2
         w1 = obj.Size1 / 2;
         w2 = obj.Size2 / 2;
         
-        v = [cosd(obj.Orientation); sind(obj.Orientation)];
+        % generate array of vertex coordinates, centered on (0,0)
         M = bsxfun (@times, [-1 1; 1 1; 1 -1; -1 -1], [w1 w2]);
+        
+        % apply rotation and translation
+        v = [cosd(obj.Orientation); sind(obj.Orientation)];
         tx  = obj.CenterX + M * v;
         ty  = obj.CenterY + M(4:-1:1,[2 1]) * v;
         
-        poly = Polygon2D.create([tx ty]);
+        % convert to polyon
+        poly = LinearRing2D.create([tx ty]);
     end
 end
 %% Methods implementing the Geometry2D interface
@@ -122,9 +126,11 @@ methods
         % POLY2 = rotate(POLY, THETA, CENTER)
         % THETA is given in degrees, in counter-clockwise order.
         
-        error('Not yet implemented...');
-%         center2 = rotate(center(obj), angle, varargin{:});
-%         res = Circle2D([center2.X center2.Y obj.Radius]);
+        
+        transfo = AffineTransform2D.createRotation(angle, varargin{:});
+        center2 = transfo.transformPoint([obj.CenterX obj.CenterY]);
+        orientation2 = obj.Orientation + rad2deg(angle);
+        res = OrientedBox2D([center2  obj.Radius1 obj.Radius2 orientation2]);
     end
 end % end methods
 
