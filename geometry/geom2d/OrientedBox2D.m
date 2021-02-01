@@ -79,11 +79,12 @@ methods
         poly = LinearRing2D.create([tx ty]);
     end
 end
+
 %% Methods implementing the Geometry2D interface
 methods
-    function res = transform(obj, transform) %#ok<STOUT>
+    function res = transform(obj, transform) 
         % Apply a geometric transform to this geometry.
-        error('Transform not implemented for Oriented Box');
+        res = transform(asPolyline(obj), transform);
     end
     
     function box = bounds(obj)
