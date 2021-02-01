@@ -75,7 +75,7 @@ end % end constructors
 %% Methods specific to Vector2D
 methods
     function n = norm(obj)
-        % Returns the norm of this vector.
+        % Return the norm of this vector.
         %
         % Example
         %   v = Vector2D([4 3]);
@@ -86,7 +86,7 @@ methods
     end
     
     function vn = normalize(obj)
-        % Returns the unit norm vector with same direction.
+        % Return the unit norm vector with same direction.
         %
         % Example
         %   v = Vector2D([4 3]);
@@ -130,6 +130,26 @@ methods
         vy = sit * obj.X + cot * obj.Y;
         
         res = Vector2D([vx vy]);
+    end
+    
+    function res = plus(obj, obj2)
+        % Implement plus operator for Vector2D objects.
+        res = Vector2D(obj.X+obj2.X, obj.Y+obj2.Y);
+    end
+    
+    function res = minus(obj, obj2)
+        % Implement minus operator for Vector2D objects.
+        res = Vector2D(obj.X-obj2.X, obj.Y-obj2.Y);
+    end
+    
+    function res = mtimes(obj, k)
+        % Implement times operator for Vector2D objects.
+        res = Vector2D(obj.X * k, obj.Y * k);
+    end
+    
+    function res = mrdivide(obj, k)
+        % Implement divides operator for Vector2D objects.
+        res = Vector2D(obj.X / k, obj.Y / k);
     end
     
     function res = uminus(obj)
