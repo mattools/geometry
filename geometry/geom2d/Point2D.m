@@ -14,7 +14,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Point2D < Geometry2D
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2018-09-01,    using Matlab 8.6.0.267246 (R2015b)
 % Copyright 2018 INRA - BIA-BIBS.
 

@@ -22,9 +22,16 @@ function test_EmptyConstructor(testCase) %#ok<*DEFNU>
 trans = AffineTransform2D();
 assertTrue(testCase, isa(trans, 'AffineTransform2D'));
 
+
 function test_createTranslation(testCase) %#ok<*DEFNU>
 
 trans = AffineTransform2D.createTranslation([20 10]);
+assertTrue(testCase, isa(trans, 'AffineTransform2D'));
+
+
+function test_createTranslation_vector(testCase) %#ok<*DEFNU>
+
+trans = AffineTransform2D.createTranslation(Vector2D(20, 10));
 assertTrue(testCase, isa(trans, 'AffineTransform2D'));
 
 
@@ -67,6 +74,32 @@ p2 = transform(p, trans);
 assertTrue(testCase, isa(p2, 'Point2D'));
 assertEqual(testCase, p2.X, 10, 'AbsTol', 0.01);
 assertEqual(testCase, p2.Y, 25, 'AbsTol', 0.01);
+
+
+function test_createLineReflection_Horiz(testCase)
+
+p = Point2D([10 10]);
+line = StraightLine2D(Point2D(20, 0), Point2D(20, 50));
+trans = AffineTransform2D.createLineReflection(line);
+
+p2 = transform(p, trans);
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X, 30, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 10, 'AbsTol', 0.01);
+
+
+function test_createLineReflection_Vert(testCase)
+
+p = Point2D([10 10]);
+line = StraightLine2D(Point2D(0, 20), Point2D(40, 20));
+trans = AffineTransform2D.createLineReflection(line);
+
+p2 = transform(p, trans);
+
+assertTrue(testCase, isa(p2, 'Point2D'));
+assertEqual(testCase, p2.X, 10, 'AbsTol', 0.01);
+assertEqual(testCase, p2.Y, 30, 'AbsTol', 0.01);
 
 
 

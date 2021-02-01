@@ -10,9 +10,10 @@ classdef AffineTransform2D < handle
 %     figure; axis equal; axis([0 50 0 50]);hold on;
 %     draw(poly1, 'b');
 %     t1 = AffineTransform2D.createTranslation([-10 -20]);
-%     t2 = AffineTransform2D.createScaling(2);
-%     t3 = AffineTransform2D.createTranslation([25 25]);
-%     transfo = t3 * t2 * t1;
+%     t2 = AffineTransform2D.createScaling(1.5);
+%     t3 = AffineTransform2D.createRotation(pi/4);
+%     t4 = AffineTransform2D.createTranslation([25 25]);
+%     transfo = t4 * t3 * t2 * t1;
 %     poly2b = transform(poly1, transfo);
 %     draw(poly2b, 'k');
 %
@@ -21,7 +22,7 @@ classdef AffineTransform2D < handle
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2019-04-03,    using Matlab 9.5.0.944444 (R2018b)
 % Copyright 2019 INRA - BIA-BIBS.
 
@@ -49,6 +50,9 @@ methods (Static)
                 dx = shift;
                 dy = varargin{1};
             end
+        elseif isa(shift, 'Vector2D')
+            dx = shift.X;
+            dy = shift.Y;
         else
             error('requires numeric input');
         end
@@ -94,7 +98,7 @@ methods (Static)
         %
         %   trans = AffineTransform2D.createRotation(NROT)
         %
-        %   See aslo
+        %   See also
         %     createTranslation, createScaling
         %
         
@@ -121,12 +125,16 @@ methods (Static)
         obj = AffineTransform2D([cot -sit tx  sit cot ty]);
     end
     
-    function obj = createScaling(factor)
+    function obj = createScaling(factor, varargin)
         % Create a new affine transform representing a scaling.
         %
         % Usage:
         % TRANS = AffineTransform2D.createScaling(S);
         % TRANS = AffineTransform2D.createScaling([SX SY]);
+
+        % parse optional center
+        center = AffineTransform2D.parseCenter(varargin{:});
+        
         if isscalar(factor)
             sx = factor;
             sy = factor;
@@ -134,10 +142,84 @@ methods (Static)
             sx = factor(1);
             sy = factor(2);
         end
-        obj = AffineTransform2D([sx 0 0   0 sy 0]);
+        
+        
+        obj = AffineTransform2D([sx 0 (1 - sx) * center(1)   0 sy (1 - sy) * center(2) ]);
+    end
+    
+    function obj = createShearX(factor)
+        % Create a shear transform in X direction.
+        %
+        % Example
+        %     poly = Polygon2D.create([0 0; 10 0;10 10;0 10]);
+        %     transfo = AffineTransform2D.createShearX(0.5);
+        %     poly2 = transform(poly, transfo);
+        %     figure; hold on, axis equal
+        %     draw(poly, 'k');
+        %     draw(poly2, 'b');
+        %
+        %   See also
+        %     createShearY, createScaling
+        
+        obj = AffineTransform2D([1 factor 0   0 1 0]);
+    end
+    
+    function obj = createShearY(factor)
+        % Create a shear transform in Y direction.
+        %
+        % Example
+        %     poly = Polygon2D.create([0 0; 10 0;10 10;0 10]);
+        %     transfo = AffineTransform2D.createShearY(0.5);
+        %     poly2 = transform(poly, transfo);
+        %     figure; hold on, axis equal
+        %     draw(poly, 'k');
+        %     draw(poly2, 'b');
+        %
+        %   See also
+        %     createShearX, createScaling
+        obj = AffineTransform2D([1 0 0   factor 1 0]);
+    end
+    
+    function trans = createLineReflection(line)
+        % Create a reflection by the given line.
+        %
+        % Example
+        %     poly = Polygon2D.create([0 0; 10 0;10 10;0 10]);
+        %     line = StraightLine2D(Point2D(20, 0), Point2D(10, 30));
+        %     ref = AffineTransform2D.createLineReflection(line);
+        %     poly2 = transform(poly, ref);
+        %     draw(poly2, 'm')
+        %   See also
+        %     createShearY, createScaling
+        
+        % coordinates of line origin
+        lineOrigin = origin(line);
+        x0 = lineOrigin.X;
+        y0 = lineOrigin.Y;
+        
+        % coordinates of direction vector
+        lineDir = direction(line);
+        dx = lineDir.X;
+        dy = lineDir.Y;
+        
+        % pre-compute some terms
+        dx2 = dx * dx;
+        dy2 = dy * dy;
+        dxy = dx * dy;
+        delta = dx2 + dy2;
+        
+        %creates the new transform
+        trans = AffineTransform2D( [...
+            (dx2 - dy2) / delta, ...
+            2 * dxy / delta, ...
+            2 * (dy2 * x0 - dxy * y0) / delta,...
+            2 * dxy / delta, ...
+            (dy2 - dx2) / delta, ...
+            2 * (dx2 * y0 - dxy * x0) / delta]);
     end
     
     function obj = identity()
+        % Return the identity transform in 2D.
         obj = AffineTransform2D([1 0 0   0 1 0]);
     end
 end
