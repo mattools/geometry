@@ -4,8 +4,8 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Ellipse2D < Curve2D
 %   An ellipse is defined by five parameters:
 %   * CenterX     the x-coordinate of the center
 %   * CenterY     the y-coordinate of the center
-%   * Radius1     the length of the semi-major axis
-%   * Radius2     the length of the semi-minor axis
+%   * Radius1     the length of the major semi-axis
+%   * Radius2     the length of the minor semi-axis
 %   * Orientation the orientation of the major axis
 %
 %   Example
@@ -16,12 +16,112 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Ellipse2D < Curve2D
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2019-05-17,    using Matlab 8.6.0.267246 (R2015b)
 % Copyright 2019 INRA - BIA-BIBS.
 
 %% Static factories
 methods (Static)
+    function elli = fit(points)
+        % FIT Fit the best ellipse from a set of points.
+        %
+        %  ELLI = Ellipse2D.fit(PTS)
+        %  PTS can be either a N-by-2 array of point coordinates, or an
+        %  instance of MultiPoint2D.
+        %
+        % Example
+        %     % Fit an ellipse from jittered points around a ref ellipse
+        %     elli = Ellipse2D([50 40 30 20 10]);
+        %     figure; draw(elli, 'k');
+        %     hold on; axis equal; axis([0 100 0 80]);
+        %     poly = asPolyline(elli, 100);
+        %     pts = poly.Coords + randn(100, 2);
+        %     draw(MultiPoint2D(pts), 'b+');
+        %     elli2 = Ellipse2D.fit(pts);
+        %     draw(elli2, 'm');
+        %     legend({'Original ellipse', 'Points', 'Fitted ellipse'});
+        % 
+        % Reference
+        % https://fr.mathworks.com/matlabcentral/fileexchange/3215-fit_ellipse
+        %
+        % See also
+        %   fromCartesianCoeffs
+        
+        % parse input
+        if isa(points, 'MultiPoint2D')
+            points = points.Coords;
+        end
+        
+        % tolerance for assuming orientation zero
+        tol = 1e-3;
+
+        % recenter coordinates to improve numerical accuracy
+        center = mean(points);
+        xi = points(:,1) - center(1);
+        yi = points(:,2) - center(2);
+        
+        % build coefficients
+        X = [xi.*xi  xi.*yi  yi.*yi  xi  yi];
+        coeffs = sum(X) / (X'*X);
+        
+        % extract parameters from the conic equation
+        A = coeffs(1);
+        B = coeffs(2);
+        C = coeffs(3);
+        D = coeffs(4);
+        E = coeffs(5);
+        
+        % compute coefficients of ellipse oriented with main axis
+        if min(abs(B / A), abs(B / C)) > tol
+            % compute orientation of ellipse
+            theta = 0.5 * atan(B / (A - C));
+            cost = cos(theta);
+            sint = sin(theta);
+            
+            % compute coefficients of axis-oriented ellipse
+            [A, C, D, E] = deal(...
+                A * cost^2 + B * cost * sint + C * sint^2, ...
+                A * sint^2 - B * cost * sint + C * cost^2, ...
+                D * cost + E * sint, ...
+                D * sint - E * cost);
+            
+            % rotation matrix from rotated space to original space
+            R = [cost -sint; sint cost];
+            % new center after rotation
+            center = center * R; % same as: center = (R' * center')'
+        else
+            theta = 0;
+            R = [1 0;0 1];
+        end
+        
+        % checkup
+        if A * C <= 0
+            error('Ellipse2D.fit: points seem to correspond to another conic type');
+        end
+        
+        % ensure A coefficient is positive
+        if A < 0
+            [A, C, D, E] = deal(-A, -C, -D, -E);
+        end
+        
+        % adjust position of center (in axis-aligned basis)
+        center = center - [ D/(2*A) E/(2*C) ];
+        
+        % rotate the axes backwards to find the center point of the original TILTED ellipse
+        center = center * R'; % same as: center = (R * center')'
+        
+        % identify ellipse radiusses
+        F   = 1 + (D^2) / (4 * A) + (E^2) / (4 * C);
+        R1  = sqrt(F / A);
+        R2  = sqrt(F / C);
+        if R1 < R2
+            [R1, R2] = deal(R2, R1);
+        end
+        
+        % create ellipse instance to encapsulate parameters
+        elli = Ellipse2D([center R1 R2 rad2deg(theta)]);
+    end
+    
     function elli = fromCartesianCoeffs(coeffs)
         % Identify an ellipse from its cartesian coefficients.
         %
@@ -45,11 +145,11 @@ methods (Static)
         yc = (2 * A * E - B * D) / delta;
         
         % find orientation
-        theta = 0.5 * atan(B / (A-C));
+        theta = 0.5 * atan(B / (A - C));
         
         % retrieve length of semi-axes
         common = 2 * (A * E^2 + C * D^2 - B * D * E + delta * F);
-        root = sqrt((A - C)^2  + B^2);
+        root = sqrt((A - C)^2 + B^2);
         a1 = -sqrt(common * ((A + C) + root)) / delta;
         a2 = -sqrt(common * ((A + C) - root)) / delta;
         
@@ -326,9 +426,9 @@ methods
     end
 end
 methods (Static)
-    function circ = fromStruct(str)
+    function elli = fromStruct(str)
         % Create a new instance from a structure.
-        circ = Ellipse2D([str.CenterX str.CenterY str.Radius1 str.Radius2 str.Orientation]);
+        elli = Ellipse2D([str.CenterX str.CenterY str.Radius1 str.Radius2 str.Orientation]);
     end
 end
 
