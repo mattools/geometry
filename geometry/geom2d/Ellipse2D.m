@@ -8,11 +8,17 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Ellipse2D < Curve2D
 %   * Radius2     the length of the minor semi-axis
 %   * Orientation the orientation of the major axis
 %
+%   
 %   Example
-%   Ellipse2D
+%     % Create and display a basic ellipse
+%     ELLI = Ellipse2D([50 50  40 20  30]);
+%     figure; axis([0 100 0 100]); hold on; axis square;
+%     draw(ELLI, 'b');
+%     draw(center(ELLI), 'bo');
 %
 %   See also
-%     Circle2D
+%     Circle2D, fit, asPolyline, draw
+%
 
 % ------
 % Author: David Legland
@@ -129,7 +135,7 @@ methods (Static)
         % https://en.wikipedia.org/wiki/Ellipse#Standard_parametric_representation
         %
         % See Also
-        %   cartesianCoefficients
+        %   cartesianCoefficients, fit
 
         % get coefficients by their usual names
         A = coeffs(1);
@@ -172,6 +178,19 @@ end % end properties
 methods
     function obj = Ellipse2D(varargin)
     % Constructor for Ellipse2D class.
+    % 
+    % Syntax
+    %   ELLI = Ellipse2D([CX CY  A B  THETA]);
+    %   Creates a new Ellipse2D object, with cente rgiven by CX and CY,
+    %   length of semi-axes given by A and B, and orientation given by
+    %   THETA (in degrees, counter-clockwise).
+    %
+    % Example
+    %   ELLI = Ellipse2D([50 50  40 20  30]);
+    %   figure; axis([0 100 0 100]); hold on; axis square;
+    %   draw(ELLI, 'b');
+    %   draw(center(ELLI), 'bo');
+    %
 
         switch nargin
             case 0
@@ -224,6 +243,9 @@ methods
     
     function center = center(obj)
         % Return the ellipse center as a Point2D.
+        %
+        % See Also
+        %   Point2D, area, bounds
         center = Point2D(obj.CenterX, obj.CenterY);
     end
     
@@ -234,6 +256,9 @@ methods
         % POLY = asPolyline(OBJ, NPTS);
         % Returns the result as an instance of LinearRing2D. Can specify
         % the number of vertices of the polyline as second argument.
+        %
+        % See Also
+        %   Polyline2D, perimeter
         
         % determines number of points
         N = 72;
@@ -336,14 +361,21 @@ methods
     end
     
     function box = bounds(obj)
-        % Return the bounding box of this geometry.
+        % Return the bounds of this ellipse.
+        %
+        % See Also
+        %   Bounds2D, center
+        
         extX = [obj.CenterX - obj.Radius obj.CenterX + obj.Radius];
         extY = [obj.CenterY - obj.Radius obj.CenterY + obj.Radius];
         box = Bounds2D([extX extY]);
     end
     
     function h = draw(varargin)
-        %DRAW Draw the current geometry, eventually specifying the style.
+        %DRAW Draw the ellipse, eventually specifying the style.
+        %
+        % See also
+        %   drawAxes, center
         
         % parse arguments using protected method implemented in Geometry
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
@@ -381,13 +413,57 @@ methods
         end
     end
     
+    function h = drawAxes(varargin)
+        % Draw the axes of ellipse, eventually specifying the style.
+        %
+        % See also
+        %   draw
+       
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        
+        % default drawing argument
+        if isempty(varargin)
+            varargin = {'b-'};
+        end
+        
+        % get ellipse parameters
+        xc = obj.CenterX;
+        yc = obj.CenterY;
+        r1 = obj.Radius1;
+        r2 = obj.Radius2;
+        theta = obj.Orientation;
+        
+        % pre-compute trig functions (angles is in degrees)
+        cot = cosd(theta);
+        sit = sind(theta);
+        
+        % compute position of several points along ellipse
+        t = [0 0.5 1.0 1.5] * pi;
+        xt = xc + r1 * cos(t) * cot - r2 * sin(t) * sit;
+        yt = yc + r1 * cos(t) * sit + r2 * sin(t) * cot;
+        
+        % stores handle to graphic object
+        h1 = plot(ax, xt([3 1]), yt([3 1]), varargin{:});
+        h2 = plot(ax, xt([4 2]), yt([4 2]), varargin{:});
+        hh = [h1 h2];
+        
+        if ~isempty(style)
+            apply(style, hh);
+        end
+        
+        if nargout > 0
+            h = hh;
+        end
+    end
+    
     function res = scale(obj, factor)
-        % Return a scaled version of this geometry.
+        % Return a scaled version of this ellipse.
         res = Ellipse2D([[obj.CenterX obj.CenterY obj.Radius1 obj.Radius2] * factor obj.Orientation]);
     end
     
     function res = translate(obj, shift)
-        % Return a translated version of this geometry.
+        % Return a translated version of this ellipse.
         res = Ellipse2D([obj.CenterX+shift(1) obj.CenterY+shift(2) obj.Radius1 obj.Radius2 obj.Orientation]);
     end
     
