@@ -28,6 +28,67 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Ellipse2D < Curve2D
 
 %% Static factories
 methods (Static)
+    function ell = equivalentEllipse(points)
+        % Compute the equivalent ellipse of a set of points.
+        %
+        %   ELL = Ellipse2D.equivalentEllipse(PTS);
+        %   Computes the ellips with the same moments up to the second order as the
+        %   set of points specified by the N-by-2 array PTS.
+        %
+        %   The result has the following form:
+        %   ELL = [XC YC A B THETA],
+        %   with XC and YC being the center of mass of the point set, A and B being
+        %   the lengths of the equivalent ellipse (see below), and THETA being the
+        %   angle of the first principal axis with the horizontal (counted in
+        %   degrees between 0 and 180 in counter-clockwise direction).
+        %   A and B are the standard deviations of the point coordinates when
+        %   ellipse is aligned with the principal axes.
+        %
+        %   Example
+        %     pts = MultiPoint2D(randn(100, 2));
+        %     pts = pts.scale([5 2]).rotate(pi/6).translate([4 3]);
+        %     ell = Ellipse2D.equivalentEllipse(pts);
+        %     figure(1); clf; hold on; axis equal;
+        %     draw(pts);
+        %     draw(ell, 'LineWidth', 2, 'Color', 'r');
+        %
+        %   See also
+        %     Ellipse2D, AffineTransform2D, draw
+        
+        % ensure input is numeric array
+        if isa(points, 'MultiPoint2D')
+            points = points.Coords;
+        end
+        
+        % ellipse center
+        xc = mean(points(:,1));
+        yc = mean(points(:,2));
+        
+        % recenter points
+        x = points(:,1) - xc;
+        y = points(:,2) - yc;
+        
+        % number of points
+        n = size(points, 1);
+        
+        % equivalent parameters
+        Ixx = sum(x.^2) / n;
+        Iyy = sum(y.^2) / n;
+        Ixy = sum(x.*y) / n;
+        
+        % compute ellipse semi-axis lengths
+        common = sqrt( (Ixx - Iyy)^2 + 4 * Ixy^2);
+        ra = sqrt(2) * sqrt(Ixx + Iyy + common);
+        rb = sqrt(2) * sqrt(Ixx + Iyy - common);
+        
+        % compute ellipse angle in degrees
+        theta = atan2(2 * Ixy, Ixx - Iyy) / 2;
+        theta = rad2deg(theta);
+        
+        % create the resulting equivalent ellipse
+        ell = Ellipse2D([xc yc ra rb theta]);
+    end
+    
     function elli = fit(points)
         % FIT Fit the best ellipse from a set of points.
         %
@@ -472,7 +533,7 @@ methods
         %
         % POLY2 = rotate(POLY, THETA)
         % POLY2 = rotate(POLY, THETA, CENTER)
-        % THETA is given in radians, in counter-clockwise order.
+        % THETA is given in radians, in counter-clockwise orientation.
         %
         % Example
         %   elli = Ellipse2D([40 20 25 15 0]);

@@ -6,10 +6,14 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) MultiPoint2D < Geometr
 %   Data are stored as a NV-by-2 array.
 %
 %   Example
-%   MultiPoint2D([0 0; 10 0; 10 10]; 0 10]);
+%     pts = MultiPoint2D(randn(100, 2));
+%     pts2 = pts.scale([5 2]).rotate(pi/6).translate([4 3]);
+%     figure; hold on; axis equal; axis([-20 20 -20 20]);
+%     draw(pts2)
 %
 %   See also
-%     Geometry2D, Polygon2D, Point2D
+%     Geometry2D, Polygon2D, Point2D, AffineTransform2D
+%
 
 % ------
 % Author: David Legland
@@ -48,7 +52,10 @@ end % end constructors
 %% Methods specific to MultiPoint2D
 methods
     function centro = centroid(obj)
-        % Compute centroid of the points within obj multi-point.
+        % Compute centroid of the points within this multi-point.
+        %
+        % P = centroid(PTS);
+        % Returns the result P as a new instance of Point2D.
         centro = Point2D(mean(obj.Coords, 1));
     end
 end
@@ -56,12 +63,12 @@ end
 %% Methods
 methods
     function res = transform(obj, transform)
-        % Apply a geometric transform to this geometry.
+        % Apply a geometric transform to this multi-point.
         res = MultiPoint2D(transformPoint(transform, obj.Coords));
     end
     
     function box = bounds(obj)
-        % Return the bounding box of this shape.
+        % Return the bounds of this multi-point.
         mini = min(obj.Coords);
         maxi = max(obj.Coords);
         box = Bounds2D([mini(1) maxi(1) mini(2) maxi(2)]);
@@ -93,30 +100,38 @@ methods
     end
     
     function res = scale(obj, factor)
-        % Return a scaled version of this geometry.
-        res = MultiPoint2D(obj.Coords * factor);
+        % Applies a scaling to this multi-point.
+        % 
+        % PTS2 = scale(PTS, S);
+        % PTS2 = scale(PTS, [SX SY]);
+        res = MultiPoint2D(obj.Coords .* factor);
     end
     
     function res = translate(obj, shift)
-        % Return a translated version of this geometry.
+        % Return a translated version of this multi-point.
+        % 
+        % PTS2 = translate(PTS, [TX TY]);
         res = MultiPoint2D(bsxfun(@plus, obj.Coords, shift));
     end
     
     function res = rotate(obj, angle, varargin)
-        % Return a rotated version of this geometry.
+        % Return a rotated version of this multi-point.
         %
-        % POLY2 = rotate(POLY, THETA)
-        % POLY2 = rotate(POLY, THETA, CENTER)
-        % THETA is given in degrees, in counter-clockwise order.
+        % POLY2 = rotate(PTS, THETA);
+        % POLY2 = rotate(PTS, THETA, CENTER);
+        % THETA is given in radians, in counter-clockwise orientation.
         
+        % extract center
         origin = [0 0];
         if ~isempty(varargin)
             origin = varargin{1};
         end
         
-        rot = createRotation(origin, deg2rad(angle));
-        verts = transformPoint(obj.Coords, rot);
+        % compute transformed coordinates
+        rot = AffineTransform2D.createRotation(angle, 'center', origin);
+        verts = transformPoint(rot, obj.Coords);
         
+        % convert to Multi-Point object
         res = MultiPoint2D(verts);
     end
 end % end methods
@@ -187,7 +202,7 @@ methods
     end
     
     function varargout = subsref(obj, subs)
-        % Overrides subsref function for LineString2D objects.
+        % Overrides subsref function for MultiPoint2D objects.
         
         % extract reference type
         s1 = subs(1);
