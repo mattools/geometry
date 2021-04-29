@@ -1,4 +1,4 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) MultiPoint3D < handle
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) MultiPoint3D < Geometry3D
 % A set of points in the 3D space.
 %
 %   Class MultiPoint3D
@@ -11,7 +11,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) MultiPoint3D < handle
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2019-02-07,    using Matlab 8.6.0.267246 (R2015b)
 % Copyright 2019 INRA - BIA-BIBS.
 
@@ -57,7 +57,7 @@ end
 methods
     function res = transform(obj, transform)
         % Apply a geometric transform to this geometry.
-        res = MutliPoint3D(transformPoint(transform, obj.Coords));
+        res = MultiPoint3D(transformPoint(transform, obj.Coords));
     end
     
     function box = bounds(obj)
@@ -72,6 +72,9 @@ methods
         
         % parse arguments using protected method implemented in Geometry
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        if isempty(varargin)
+            varargin = {'bo'};
+        end
         
         % draw the geometric primitive
         hh = plot3(ax, obj.Coords(:,1), obj.Coords(:,2), obj.Coords(:,3), varargin{:});
@@ -161,7 +164,7 @@ methods
     end
     
     function varargout = subsref(obj, subs)
-        % Overrides subsref function for LineString2D objects.
+        % Overrides subsref function for MultiPoint3D objects.
         
         % extract reference type
         s1 = subs(1);

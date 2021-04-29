@@ -66,7 +66,6 @@ methods (Access = protected)
             varargin(ind) = [];
         end
     end
-    
 end % end methods
 
 %% Serialization methods

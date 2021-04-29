@@ -145,7 +145,7 @@ end
 %% sub-indexing methods
 methods
     function varargout = subsref(obj, subs)
-        % Overrides subsref function for Point2D objects.
+        % Overrides subsref function for Point3D objects.
         
         % extract reference type
         s1 = subs(1);

@@ -1,5 +1,5 @@
 classdef Ellipsoid3D < Geometry3D
-%ELLIPSOID3D  One-line description here, please.
+% An ellipsoid defined by center, size and orientation.
 %
 %   Class Ellipsoid3D
 %
@@ -31,6 +31,72 @@ properties
     EulerAngles = [0 0 0];
     
 end % end properties
+
+
+%% Static factories
+methods (Static)
+    function elli = equivalentEllipsoid(points)
+        % Compute the Equivalent ellipsoid of a set of 3D points.
+        %
+        % ELL = equivalentEllipsoid(PTS)
+        % Compute the equivalent ellipsoid of the set of points PTS.
+        %
+        % Example
+        %     pts = MultiPoint3D(randn(300, 3));
+        %     pts = transform(pts, AffineTransform3D.createScaling([6 4 2]));
+        %     pts = transform(pts, AffineTransform3D.createRotationOx(pi/6));
+        %     pts = transform(pts, AffineTransform3D.createRotationOy(pi/4));
+        %     pts = transform(pts, AffineTransform3D.createRotationOz(pi/3));
+        %     pts = transform(pts, AffineTransform3D.createTranslation([5 4 3]));
+        %     elli = Ellipsoid3D.equivalentEllipsoid(pts);
+        %     figure; hold on; axis equal;
+        %     draw(pts); draw(elli);
+        %     draw(elli, ...
+        %         'drawEllipses', true, 'EllipseColor', 'b', 'EllipseWidth', 3);
+        %
+        %   See also
+        %     Sphere3D, Ellipse2D.equivalentEllipse, draw
+        %     rotationMatrixToEulerAngles 
+        
+        % ensure input is a numeric array
+        if isa(points, 'MultiPoint3D')
+            points = points.Coords;
+        end
+        
+        % number of points
+        n = size(points, 1);
+        
+        % compute centroid
+        center = mean(points);
+        
+        % compute the covariance matrix
+        covPts = cov(points)/n;
+        
+        % perform a principal component analysis with 3 variables,
+        % to extract equivalent axes
+        [U, S] = svd(covPts);
+        
+        % extract length of each semi axis
+        radii = sqrt(5) * sqrt(diag(S)*n)';
+        
+        % sort axes from greater to lower
+        [radii, ind] = sort(radii, 'descend');
+        
+        % format U to ensure first axis points to positive x direction
+        U = U(ind, :);
+        if U(1,1) < 0
+            U = -U;
+            % keep matrix determinant positive
+            U(:,3) = -U(:,3);
+        end
+        
+        % convert axes rotation matrix to Euler angles
+        angles = rotationMatrixToEulerAngles(U);
+        
+        % concatenate result to form an ellipsoid object
+        elli = Ellipsoid3D([center, radii, angles]);
+    end
+end
 
 
 %% Constructor
@@ -111,17 +177,17 @@ methods
         error('Method not implemented');
     end
     
-    function box = bounds(obj)
-        % Return the bounding box of this shape.
+    function bnd = bounds(obj)
+        % Return the (approximated) bounds of this ellipsoid.
 
-        nPhi    = 32;
-        nTheta  = 16;
+        nPhi    = 64;
+        nTheta  = 32;
         [x, y, z] = surfaceVertices(obj, nPhi, nTheta);
-        box = Bounds3D([min(x(:)) max(x(:)) min(y(:)) max(y(:)) min(z(:)) max(z(:))]);
+        bnd = Bounds3D([min(x(:)) max(x(:)) min(y(:)) max(y(:)) min(z(:)) max(z(:))]);
     end
     
     function h = draw(varargin)
-        %DRAW Draw the ellipoid, eventually specifying the style.
+        %DRAW Draw the ellipsoid, eventually specifying the style.
         
         % parse arguments using protected method implemented in Geometry
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
@@ -157,18 +223,19 @@ methods
     
     function [x, y, z] = surfaceVertices(obj, nPhi, nTheta)
         % Compute coordinates of vertices used to draw ellipsoid surface.
+        %
+        % [X, Y, Z] = surfaceVertices(ELL, NPHI, NTHETA);
+        %
         
         % convert unit basis to ellipsoid basis
-        % TODO: use AffineTransform3D or other globalisation
-        sca     = createScaling3d(obj.Radius);
-        rotZ    = createRotationOz(obj.EulerAngles(1) * pi / 180);
-        rotY    = createRotationOy(obj.EulerAngles(2) * pi / 180);
-        rotX    = createRotationOx(obj.EulerAngles(3) * pi / 180);
-        tra     = createTranslation3d(obj.Center);
+        sca  = AffineTransform3D.createScaling(obj.Radius);
+        rotZ = AffineTransform3D.createRotationOz(obj.EulerAngles(1) * pi / 180);
+        rotY = AffineTransform3D.createRotationOy(obj.EulerAngles(2) * pi / 180);
+        rotX = AffineTransform3D.createRotationOx(obj.EulerAngles(3) * pi / 180);
+        tra  = AffineTransform3D.createTranslation(obj.Center);
         
         % concatenate transforms
-        trans   = tra * rotZ * rotY * rotX * sca;
-        
+        trans = tra * rotZ * rotY * rotX * sca;
         
         % parametrisation of ellipsoid in spherical coordinates
         theta   = linspace(0, pi, nTheta+1);
@@ -181,7 +248,10 @@ methods
         z = ones(length(phi),1) * cos(theta);
         
         % transform mesh vertices
-        [x, y, z] = transformPoint3d(x, y, z, trans);
+        pts2 = transformPoint(trans, [x(:) y(:) z(:)]);
+        x(:) = pts2(:, 1);
+        y(:) = pts2(:, 2);
+        z(:) = pts2(:, 3);
     end
 end
 
@@ -189,7 +259,7 @@ end
 %% Methods implementing the Geometry3D interface (more)
 methods
     function res = scale(obj, varargin)
-        % Return a scaled version of this geometry.
+        % Return a scaled version of this ellipsoid.
         factor = varargin{1};
         if ~isscalar(factor)
             error('Requires scaling factor to be a scalar');
@@ -201,7 +271,7 @@ methods
     end
     
     function res = translate(obj, varargin)
-        % Return a translated version of this geometry.
+        % Return a translated version of this ellipsoid.
         shift = varargin{1};
         center = obj.Center + shift;
         data = [center obj.Radius obj.EulerAngles];
@@ -220,6 +290,7 @@ methods
             'EulerAngles', obj.EulerAngles);
     end
 end
+
 methods (Static)
     function elli = fromStruct(str)
         % Create a new instance from a structure.
