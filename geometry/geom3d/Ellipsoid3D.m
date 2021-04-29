@@ -193,8 +193,10 @@ methods
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % default values for drawing
-        nPhi    = 32;
-        nTheta  = 16;
+        [nPhi, varargin]         = parseOption(varargin, 'nPhi', 32);
+        [nTheta, varargin]       = parseOption(varargin, 'nTheta', 16);
+        [drawEllipses, varargin] = parseOption(varargin, 'drawEllipses', false);
+        [drawAxes, varargin]     = parseOption(varargin, 'drawAxes', false);
         
         % process input options: when a string is found, assumes this is the
         % beginning of options
@@ -204,6 +206,10 @@ methods
         else
             options = [options varargin];
         end
+        ellipseOptions = {'color', 'b', 'LineWidth', 2};
+        axesOptions = {'color', 'b', 'LineWidth', 2};
+        
+        transfo = localToGlobalTransform(obj);
         
         [x, y, z] = surfaceVertices(obj, nPhi, nTheta);
      
@@ -215,6 +221,47 @@ methods
             apply(style, hh);
         end
         
+        if drawEllipses
+            % parametrisation for 3D ellipses
+            nVertices = 120;
+            t = linspace(0, 2*pi, nVertices+1);
+            
+            % XY circle
+            xc1 = cos(t');
+            yc1 = sin(t');
+            zc1 = zeros(size(t'));
+            
+            % XZ circle
+            xc2 = cos(t');
+            yc2 = zeros(size(t'));
+            zc2 = sin(t');
+            
+            % YZ circle
+            xc3 = zeros(size(t'));
+            yc3 = cos(t');
+            zc3 = sin(t');
+            
+            % compute transformed ellipses
+            pts1 = transformPoint(transfo, [xc1, yc1, zc1]);
+            pts2 = transformPoint(transfo, [xc2, yc2, zc2]);
+            pts3 = transformPoint(transfo, [xc3, yc3, zc3]);
+            plot3(pts1(:, 1), pts1(:, 2), pts1(:, 3), ellipseOptions{:});
+            plot3(pts2(:, 1), pts2(:, 2), pts2(:, 3), ellipseOptions{:});
+            plot3(pts3(:, 1), pts3(:, 2), pts3(:, 3), ellipseOptions{:});
+        end
+        
+        if drawAxes
+            pts = [...
+                -1 0 0; +1 0 0; ... % x-axis
+                0 -1 0; 0 +1 0; ... % y-axis
+                0 0 -1; 0 0 +1];    % z-axis
+            pts = transformPoint(transfo, pts);
+            
+            plot3(pts([1 2], 1), pts([1 2], 2), pts([1 2], 3), axesOptions{:});
+            plot3(pts([3 4], 1), pts([3 4], 2), pts([3 4], 3), axesOptions{:});
+            plot3(pts([5 6], 1), pts([5 6], 2), pts([5 6], 3), axesOptions{:});
+        end
+
         % format output argument
         if nargout > 0
             h = hh;
@@ -228,14 +275,7 @@ methods
         %
         
         % convert unit basis to ellipsoid basis
-        sca  = AffineTransform3D.createScaling(obj.Radius);
-        rotZ = AffineTransform3D.createRotationOz(obj.EulerAngles(1) * pi / 180);
-        rotY = AffineTransform3D.createRotationOy(obj.EulerAngles(2) * pi / 180);
-        rotX = AffineTransform3D.createRotationOx(obj.EulerAngles(3) * pi / 180);
-        tra  = AffineTransform3D.createTranslation(obj.Center);
-        
-        % concatenate transforms
-        trans = tra * rotZ * rotY * rotX * sca;
+        transfo = localToGlobalTransform(obj);
         
         % parametrisation of ellipsoid in spherical coordinates
         theta   = linspace(0, pi, nTheta+1);
@@ -248,10 +288,25 @@ methods
         z = ones(length(phi),1) * cos(theta);
         
         % transform mesh vertices
-        pts2 = transformPoint(trans, [x(:) y(:) z(:)]);
+        pts2 = transformPoint(transfo, [x(:) y(:) z(:)]);
         x(:) = pts2(:, 1);
         y(:) = pts2(:, 2);
         z(:) = pts2(:, 3);
+    end
+end
+
+methods (Access = private)
+    function transfo = localToGlobalTransform(obj)
+        % Compute the affine transform that maps unit sphere to ellipsoid.
+        
+        sca  = AffineTransform3D.createScaling(obj.Radius);
+        rotZ = AffineTransform3D.createRotationOz(obj.EulerAngles(1) * pi / 180);
+        rotY = AffineTransform3D.createRotationOy(obj.EulerAngles(2) * pi / 180);
+        rotX = AffineTransform3D.createRotationOx(obj.EulerAngles(3) * pi / 180);
+        tra  = AffineTransform3D.createTranslation(obj.Center);
+        
+        % concatenate transforms
+        transfo = tra * rotZ * rotY * rotX * sca;
     end
 end
 
@@ -300,3 +355,13 @@ end
 
 end % end classdef
 
+function [value, argList] = parseOption(argList, optionName, defaultValue)
+
+value = defaultValue;
+ind = find(strcmpi(optionName, argList));
+if ~isempty(ind)
+    value = argList{ind+1};
+    argList(ind:ind+1) = [];
+end
+
+end
