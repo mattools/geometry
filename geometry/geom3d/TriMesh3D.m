@@ -265,6 +265,14 @@ methods
         % create the resulting data structure
         res = TriMesh3D(vertices2, faces2);
     end
+    
+    function res = reverseOrientation(obj)
+        % Reverse the orientation of the normals of the mesh.
+        %
+        %    MESH2 = reverseOrientation(MESH);
+        faces2 = obj.Faces(:, [1 3 2]);
+        res = TriMesh3D(obj.Vertices, faces2);
+    end
 end
 
 %% Geometric information about mesh

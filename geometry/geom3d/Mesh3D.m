@@ -113,7 +113,7 @@ methods (Static)
         
         % check if off format
         if strcmpi(ext, '.off')
-            mesh = read_off(fileName);
+            mesh = Mesh3D.read_off(fileName);
         else
             if exist('loadjson', 'file') == 0
                 error('Requires the ''jsonlab'' library');

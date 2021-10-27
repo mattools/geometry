@@ -1,15 +1,15 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Box3D < handle
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Bounds3D < handle
 % Bounding box of a 3D shape.
 %
-%   Class Box3D
-%   Defined by max extent in each dimension:
+%   Class Bounds3D
+%   Defined by min and max extent in each dimension:
 %   * XMin, XMax, YMin, YMax, ZMin, ZMax
 %
 %   Example
-%   box = Box3D([0, 10, 0, 10, 0, 10])
+%     bnd = Bounds3D([0, 10, 0, 10, 0, 10])
 %
 %   See also
-%     Geometry3D, Box2D
+%     Geometry3D, Bounds2D
 %
 
 % ------
@@ -33,8 +33,8 @@ end % end properties
 
 %% Constructor
 methods
-    function obj = Box3D(varargin)
-        % Constructor for Box3D class.
+    function obj = Bounds3D(varargin)
+        % Constructor for Bounds3D class.
         
         if ~isempty(varargin)
             var1 = varargin{1};
@@ -124,14 +124,14 @@ methods
     function res = scale(obj, varargin)
         % Return a scaled version of this box.
         factor = varargin{1};
-        res = Box3D([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax] * factor);
+        res = Bounds3D([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax] * factor);
     end
     
     function res = translate(obj, varargin)
         % Return a translated version of this box.
         shift = varargin{1};
         data2 = [obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax] + shift(1, [1 1 2 2 3 3]);
-        res = Box3D(data2);
+        res = Bounds3D(data2);
     end
 end % end methods
 
@@ -156,7 +156,7 @@ methods (Access = protected)
         %   parseDrawInputArguments in Geometry class
         
         % identify the variable corresponding to class instance
-        ind = cellfun(@(x)isa(x, 'Box3D'), varargin);
+        ind = cellfun(@(x)isa(x, 'Bounds3D'), varargin);
         obj = varargin{ind};
         varargin(ind) = [];
         
@@ -194,7 +194,7 @@ methods
     
     function str = toStruct(obj)
         % Convert to a structure to facilitate serialization.
-        str = struct('type', 'Box3D', ...
+        str = struct('type', 'Bounds3D', ...
             'XMin', obj.XMin, 'XMax', obj.XMax, ...
             'YMin', obj.YMin, 'YMax', obj.YMax, ...
             'ZMin', obj.ZMin, 'ZMax', obj.ZMax);
@@ -207,12 +207,12 @@ methods (Static)
         if exist('loadjson', 'file') == 0
             error('Requires the ''jsonlab'' library');
         end
-        box = Box3D.fromStruct(loadjson(fileName));
+        box = Bounds3D.fromStruct(loadjson(fileName));
     end
     
     function box = fromStruct(str)
         % Creates a new instance from a structure
-        box = Box3D([str.XMin str.XMax str.YMin str.YMax str.ZMin str.ZMax]);
+        box = Bounds3D([str.XMin str.XMax str.YMin str.YMax str.ZMin str.ZMax]);
     end
 end
 

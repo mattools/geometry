@@ -2,7 +2,7 @@ classdef Bounds2D < handle
 % The bounds of a planar shape in each direction.
 %
 %   Class Bounds2D
-%   Defined by max extent in each dimension:
+%   Defined by the min and max extent in each dimension:
 %   * XMin, XMax, YMin, YMax.
 %
 %   Example
@@ -11,11 +11,11 @@ classdef Bounds2D < handle
 %     draw(box, 'b')
 %
 %   See also
-%     Geometry2D, Box3D
+%     Geometry2D, Box2D, Bounds3D
 
 % ------
 % Author: David Legland
-% e-mail: david.legland@inra.fr
+% e-mail: david.legland@inrae.fr
 % Created: 2018-08-14,    using Matlab 7.9.0.529 (R2009b)
 % Copyright 2013 INRA - Cepia Software Platform.
 
