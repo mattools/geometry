@@ -90,7 +90,7 @@ methods
         centro = Point3D(sum(bsxfun(@times, centers, lengths), 1) / sum(lengths));
     end
     
-    function nv = vertexNumber(obj)
+    function nv = vertexCount(obj)
         % Get the number of vertices in the polyline.
         nv = size(obj.Coords, 1);
     end

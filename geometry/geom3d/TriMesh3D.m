@@ -2,9 +2,28 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) TriMesh3D < Mesh3D
 % Class for representing a 3D triangular mesh.
 %
 %   MESH = TriMesh3D(V, F)
+%   Creates a new triangular mesh by specifying the vertices and the face
+%   array.
+%
+%   This class has the following features:
+%   * extends the "Mesh3D" interface
+%   * restricted to triangular faces
+%   * optional information about topology of edges
+%   * can not remove vertices.
 %
 %   Example
-%   TriMesh3D
+%     % Create 3D mesh representing an octahedron (6 vertices and 8 faces)
+%     oct = Mesh3D.createOctahedron;
+%     figure; draw(oct);
+%
+%     % Create 3D mesh representing an icosahedron (12 vertices and 20 faces)
+%     ico = Mesh3D.createIcosahedron;
+%     figure; draw(ico);
+%
+%     % Read triangular mesh in OFF format
+%     mesh = Mesh3D.read_off('mushroom.off');
+%     figure; draw(mesh, 'FaceColor', [0 1 0], 'EdgeColor', 'none');
+%
 %
 %   See also
 %     Meshes3D
@@ -312,7 +331,7 @@ end
 
 %% Vertex management methods
 methods
-    function nv = vertexNumber(obj)
+    function nv = vertexCount(obj)
         % Get the number of vertices in the mesh.
         nv = size(obj.Vertices, 1);
     end
@@ -351,7 +370,7 @@ end
 
 %% Edge management methods
 methods
-    function ne = edgeNumber(obj)
+    function ne = edgeCount(obj)
         % Get the number of edges in the mesh.
         
         % ne = edgeNumber(mesh)
@@ -459,7 +478,7 @@ end
 
 %% Face management methods
 methods
-    function nf = faceNumber(obj)
+    function nf = faceCount(obj)
         % Get the number of faces in the mesh.
         nf = size(obj.Faces, 1);
     end

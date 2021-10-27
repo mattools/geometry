@@ -104,7 +104,7 @@ methods
         verts = MultiPoint3D(obj.Coords);
     end
     
-    function nv = vertexNumber(obj)
+    function nv = vertexCount(obj)
         % Get the number of vertices in this polyline.
         nv = size(obj.Coords, 1);
     end
