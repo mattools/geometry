@@ -7,7 +7,7 @@ classdef StraightLine2D < Geometry2D
 %     P1 = Point2D([40 10]);
 %     P2 = Point2D([20 40]);
 %     L = StraightLine2D(P1, P2);
-%     figure; axis equal;axis([0 50 0 50]; holdon;
+%     figure; axis equal;axis([0 50 0 50]; hold on;
 %     draw(L);
 %
 %   See also
@@ -65,7 +65,7 @@ methods
             elseif isnumeric(var1)
                 obj.Origin = var1(1, 1:2);
             else
-                error('Can not interpret second argument');
+                error('Can not interpret first argument');
             end
             
             % second argument can be either another point, or the direction
@@ -75,7 +75,7 @@ methods
             elseif isa(var2, 'Vector3D')
                 obj.Direction = [var2.X var2.Y];
             elseif isnumeric(var2)
-                % numeric inpu consider another point as default.
+                % numeric input consider another point as default.
                 obj.Direction = var2 - obj.Origin;
             else
                 error('Can not interpret second argument');
@@ -219,11 +219,12 @@ end
 %% Methods implementing the Geometry2D interface
 methods
     function bnd = bounds(obj) %#ok<MANU>
+        % Returns infinite bounds in each direction.
         bnd = Bounds2D([-inf inf -inf inf]);
     end
     
     function h = draw(varargin)
-        %DRAW Draw this point, eventually specifying the style.
+        %DRAW Draw this line, eventually specifying the style.
         
         % parse arguments using protected method implemented in Geometry
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});

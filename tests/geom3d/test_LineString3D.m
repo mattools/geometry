@@ -64,11 +64,11 @@ assertTrue(testCase, isnumeric(res));
 assertEqual(testCase, size(res), [4 3]);
 
 
-function test_VertexNumber(testCase) %#ok<*DEFNU>
+function test_vertexCount(testCase) %#ok<*DEFNU>
 % Test call of function without argument
 
 ring = LineString3D([0 0 0; 10 0 0; 10 10 0; 0 10 0]);
-assertEqual(testCase, 4, vertexNumber(ring));
+assertEqual(testCase, 4, vertexCount(ring));
 
 
 function test_length_square(testCase) %#ok<*DEFNU>

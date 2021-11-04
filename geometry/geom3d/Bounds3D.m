@@ -39,15 +39,15 @@ methods
         if ~isempty(varargin)
             var1 = varargin{1};
             if size(var1, 1) ~= 1
-                error('Creating a box requires an array with one row, not %d', size(var1, 1));
+                error('Creating a Bounds3D requires an array with one row, not %d', size(var1, 1));
             end
             if size(var1, 2) ~= 6
-                error('Creating a box requires an array with six columns, not %d', size(var1, 2));
+                error('Creating a Bounds3D requires an array with six columns, not %d', size(var1, 2));
             end
             data = var1;
         else
             % default box is unit square, with origin as lower-left corner.
-            data = [0 1 0 1 0 1];
+            data = [0 1  0 1  0 1];
         end
         
         obj.XMin = data(1);
@@ -60,11 +60,17 @@ methods
 
 end % end constructors
 
+%% Methods
+methods
+    function b = isFinite(obj)
+        b = all(isfinite([obj.XMin obj.XMax  obj.YMin obj.YMax  obj.ZMin obj.ZMax]));
+    end
+end
 
 %% Methods
 methods
     function box = boundingBox(obj)
-        % Return the bounding box of obj shape.
+        % Return the bounding box of this shape.
         box = Box2D([obj.XMin obj.XMax obj.YMin obj.YMax obj.ZMin obj.ZMax]);
     end
     

@@ -1,5 +1,5 @@
 classdef Vector2D < handle
-%VECTOR2D  One-line description here, please.
+% A Vector in 2D plane.
 %
 %   Class Vector2D
 %
