@@ -25,6 +25,20 @@ assertEqual(testCase, 5, p.X);
 assertEqual(testCase, 4, p.Y);
 assertEqual(testCase, 3, p.Z);
 
+
+function test_plusVector(testCase) %#ok<*DEFNU>
+% Test call of function without argument
+
+p1 = Point3D([10 10 10]);
+v = Vector3D([1 2 3]);
+
+res = p1 + v;
+
+assertEqual(testCase, res.X, 11);
+assertEqual(testCase, res.Y, 12);
+assertEqual(testCase, res.Z, 13);
+
+
 function test_Serialize(testCase)
 % Test call of function without argument
 

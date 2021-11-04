@@ -1,4 +1,4 @@
-classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Point3D < Geometry3D
+classdef (InferiorClasses = {?matlab.graphics.axis.Axes, ?Vector3D}) Point3D < Geometry3D
 % A point in the 3-dimensional space.
 %
 %   Usage:
@@ -20,6 +20,26 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Point3D < Geometry3D
 % e-mail: david.legland@inra.fr
 % Created: 2019-02-07,    using Matlab 8.6.0.267246 (R2015b)
 % Copyright 2019 INRA - BIA-BIBS.
+
+%% Static factories
+methods (Static)
+    function p = centroid(varargin)
+        % Compute the centroid of several points.
+        xc = 0;
+        yc = 0;
+        zc = 0;
+        for i = 1:length(varargin)
+            var_i = varargin{i};
+            if ~isa(var_i, 'Point3D')
+                error('Requires all input to be Point3D');
+            end
+            xc = xc + var_i.X;
+            yc = yc + var_i.Y;
+            zc = zc + var_i.Z;
+        end
+        p = Point3D([xc yc zc] / length(varargin));
+    end
+end
 
 
 %% Properties
@@ -78,6 +98,17 @@ methods
 
 end % end constructors
 
+%% Methods specific to Point3D
+methods
+    function res = plus(obj, obj2)
+        % Implement plus operator for points and vectors.
+        if ~isa(obj2, 'Vector3D')
+            error('Requires second argument to be a Vector3D');
+        end
+        res = Point3D(obj.X+obj2.X, obj.Y+obj2.Y, obj.Z+obj2.Z);
+    end
+
+end
 
 %% Methods implementing the Geometry3D interface
 methods
@@ -139,62 +170,6 @@ methods (Static)
     function point = fromStruct(str)
         % Create a new instance from a structure.
         point = Point3D([str.X str.Y str.Z]);
-    end
-end
-
-%% sub-indexing methods
-methods
-    function varargout = subsref(obj, subs)
-        % Overrides subsref function for Point3D objects.
-        
-        % extract reference type
-        s1 = subs(1);
-        type = s1.type;
-        
-        % switch between reference types
-        if strcmp(type, '.')
-            % in case of dot reference, use builtin
-            
-            % check if we need to return output or not
-            if nargout > 0
-                % if some output arguments are asked, pre-allocate result
-                varargout = cell(nargout, 1);
-                [varargout{:}] = builtin('subsref', obj, subs);
-            else
-                % call parent function, and eventually return answer
-                builtin('subsref', obj, subs);
-                if exist('ans', 'var')
-                    varargout{1} = ans; %#ok<NOANS>
-                end
-            end
-            
-        elseif strcmp(type, '()')
-            % In case of parens reference, index the inner data
-            varargout{1} = 0;
-            
-            % different processing if 1 or 2 indices are used
-            ns = length(s1.subs);
-            if ns == 1
-                % use index as dimension
-                sub1 = s1.subs{1};
-                res = zeros(size(sub1));
-                res(sub1 == 1) = obj.X;
-                res(sub1 == 2) = obj.Y;
-                res(sub1 == 3) = obj.Z;
-                varargout{1} = res;
-                
-            else
-                error('Point3D:subsref', ...
-                    'Requires single indices.');
-            end
-            
-        elseif strcmp(type, '{}')
-            error('Point3D:subsref', ...
-                'can not manage braces reference');
-        else
-            error('Point3D:subsref', ...
-                ['can not manage such reference: ' type]);
-        end
     end
 end
 

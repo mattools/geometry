@@ -18,6 +18,24 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Point2D < Geometry2D
 % Created: 2018-09-01,    using Matlab 8.6.0.267246 (R2015b)
 % Copyright 2018 INRA - BIA-BIBS.
 
+%% Static factories
+methods (Static)
+    function p = centroid(varargin)
+        % Compute the centroid of several points.
+        xc = 0;
+        yc = 0;
+        for i = 1:length(varargin)
+            var_i = varargin{i};
+            if ~isa(var_i, 'Point2D')
+                error('Requires all input to be Point2D');
+            end
+            xc = xc + var_i.X;
+            yc = yc + var_i.Y;
+        end
+        p = Point2D([xc yc] / length(varargin));
+    end
+end
+
 
 %% Properties
 properties
@@ -159,6 +177,7 @@ methods
     end
 end % end methods
 
+
 %% Serialization methods
 methods
     function str = toStruct(obj)
@@ -170,62 +189,6 @@ methods (Static)
     function point = fromStruct(str)
         % Create a new instance from a structure.
         point = Point2D(str.X, str.Y);
-    end
-end
-
-
-%% sub-indexing methods
-methods
-    function varargout = subsref(obj, subs)
-        % Overrides subsref function for Point2D objects.
-        
-        % extract reference type
-        s1 = subs(1);
-        type = s1.type;
-        
-        % switch between reference types
-        if strcmp(type, '.')
-            % in case of dot reference, use builtin
-            
-            % check if we need to return output or not
-            if nargout > 0
-                % if some output arguments are asked, pre-allocate result
-                varargout = cell(nargout, 1);
-                [varargout{:}] = builtin('subsref', obj, subs);
-            else
-                % call parent function, and eventually return answer
-                builtin('subsref', obj, subs);
-                if exist('ans', 'var')
-                    varargout{1} = ans; %#ok<NOANS>
-                end
-            end
-            
-        elseif strcmp(type, '()')
-            % In case of parens reference, index the inner data
-            varargout{1} = 0;
-            
-            % different processing if 1 or 2 indices are used
-            ns = length(s1.subs);
-            if ns == 1
-                % use index as dimension
-                sub1 = s1.subs{1};
-                res = zeros(size(sub1));
-                res(sub1 == 1) = obj.X;
-                res(sub1 == 2) = obj.Y;
-                varargout{1} = res;
-                
-            else
-                error('Point2D:subsref', ...
-                    'Requires single indices.');
-            end
-            
-        elseif strcmp(type, '{}')
-            error('Point2D:subsref', ...
-                'can not manage braces reference');
-        else
-            error('Point2D:subsref', ...
-                ['can not manage such reference: ' type]);
-        end
     end
 end
 

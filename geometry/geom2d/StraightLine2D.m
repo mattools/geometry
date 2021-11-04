@@ -21,6 +21,22 @@ classdef StraightLine2D < Geometry2D
 % Copyright 2020 INRAE - BIA-BIBS.
 
 
+%% Static factories
+methods (Static)
+    function line = median(p1, p2)
+        % Create the median line between two points.
+        %
+        % LINE = StraightLine2D.median(PT1, PT2);
+        
+        % middle point
+        p0 = Point2D.centroid(p1, p2);
+        % direction of line, orthogonal to direction between points
+        v = normalize(rotate90(Vector2D(p1, p2)));
+        % create line from middle point and direction
+        line = StraightLine2D(p0, v);
+    end
+end
+
 %% Properties
 properties
     % The origin of this straight line, as a 1-by-2 numeric array.
@@ -72,7 +88,7 @@ methods
             var2 = varargin{2};
             if isa(var2, 'Point2D')
                 obj.Direction = [var2.X var2.Y] - obj.Origin;
-            elseif isa(var2, 'Vector3D')
+            elseif isa(var2, 'Vector2D')
                 obj.Direction = [var2.X var2.Y];
             elseif isnumeric(var2)
                 % numeric input consider another point as default.
@@ -239,9 +255,9 @@ methods
         ylim = get(ax, 'ylim');
         
         % clip lines with current axis box
-        edge = clip(obj, [xlim ylim]);
+        edge = clip(obj, Bounds2D([xlim ylim]));
         
-        if ~isempty(ege)
+        if ~isempty(edge)
             % draw current clipped line
             hh = draw(ax, edge, varargin{:});
         

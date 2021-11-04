@@ -53,12 +53,18 @@ methods
             end
             
         elseif nargin == 2
-            % initialisation from two scalar numeric argument
             var1 = varargin{1};
             var2 = varargin{2};
             if isnumeric(var1) && isnumeric(var2) && isscalar(var1) && isscalar(var2)
-                obj.X = varargin{1};
-                obj.Y = varargin{2};
+                % initialisation from two scalar numeric argument
+                obj.X = var1;
+                obj.Y = var2;
+                
+            elseif isa(var1, 'Point2D') && isa(var2, 'Point2D')
+                % create vector as the difference between two points
+                obj.X = var2.X - var1.X;
+                obj.Y = var2.Y - var1.Y;
+                
             else
                 error('Can not parse inputs for Vector2D');
             end
@@ -129,6 +135,25 @@ methods
         vx = cot * obj.X - sit * obj.Y;
         vy = sit * obj.X + cot * obj.Y;
         
+        res = Vector2D([vx vy]);
+    end
+    
+    function res = rotate90(obj, n)
+        % Apply rotation(s) by 90 degrees to this vector.
+        %
+        %   V2 = rotate90(V);
+        %   V2 = rotate90(V, NROT);
+        
+        if nargin == 1
+            n = 1;
+        end
+        vx = obj.X;
+        vy = obj.Y;
+        for i = 1:n
+            tmp = vx;
+            vx = -vy;
+            vy = tmp;
+        end
         res = Vector2D([vx vy]);
     end
     
