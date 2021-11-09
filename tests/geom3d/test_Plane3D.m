@@ -52,3 +52,48 @@ pinter = intersectLine(med12, line12);
 
 assertTrue(testCase, isa(pinter, 'Point3D'));
 
+
+function test_clipPlaneXY(testCase) %#ok<*DEFNU>
+
+plane = Plane3D(Point3D([5 5 5]), Vector3D([1 0 0]), Vector3D([0 1 0]));
+bounds = Bounds3D([0 10 0 10 0 10]);
+
+poly = clip(plane, bounds);
+
+assertTrue(testCase, isa(poly, 'LinearRing3D'));
+assertEqual(testCase, 4, vertexCount(poly));
+assertTrue(testCase, ismember([ 0  0 5], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([10  0 5], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([ 0 10 5], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([10 10 5], poly.Coords, 'rows'));
+
+
+function test_clipPlaneXZ(testCase) %#ok<*DEFNU>
+
+plane = Plane3D(Point3D([5 5 5]), Vector3D([1 0 0]), Vector3D([0 0 1]));
+bounds = Bounds3D([0 10 0 10 0 10]);
+
+poly = clip(plane, bounds);
+
+assertTrue(testCase, isa(poly, 'LinearRing3D'));
+assertEqual(testCase, 4, vertexCount(poly));
+assertTrue(testCase, ismember([ 0 5  0], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([10 5  0], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([ 0 5 10], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([10 5 10], poly.Coords, 'rows'));
+
+
+function test_clipPlaneYZ(testCase) %#ok<*DEFNU>
+
+plane = Plane3D(Point3D([5 5 5]), Vector3D([0 1 0]), Vector3D([0 0 1]));
+bounds = Bounds3D([0 10 0 10 0 10]);
+
+poly = clip(plane, bounds);
+
+assertTrue(testCase, isa(poly, 'LinearRing3D'));
+assertEqual(testCase, 4, vertexCount(poly));
+assertTrue(testCase, ismember([5  0  0], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([5 10  0], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([5  0 10], poly.Coords, 'rows'));
+assertTrue(testCase, ismember([5 10 10], poly.Coords, 'rows'));
+

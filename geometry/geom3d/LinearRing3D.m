@@ -33,13 +33,34 @@ methods
     function obj = LinearRing3D(varargin)
     % Constructor for LineString3D class.
     
-        if ~isempty(varargin)
+        if nargin == 1
             var1 = varargin{1};
-            if size(var1, 2) ~= 3
-                error('Creating a LinearRing3D requires an array with three columns, not %d', size(var1, 2));
+            
+            if isnumeric(var1)
+                %  construction from a N-by-3 numeric array
+                if size(var1, 2) ~= 3
+                    error('Creating a LinearRing3D requires an array with three columns, not %d', size(var1, 2));
+                end
+                obj.Coords = var1;
+                
+            elseif isa(var1, 'Point3D')
+                % Creation from an array of points
+                np = numel(var1);
+                obj.Coords = zeros(np, 3);
+                for i = 1:np
+                    pt = var1(i);
+                    obj.Coords(i, :) = [pt.X pt.Y pt.Z];
+                end
+                
+            elseif isa(var1, 'LinearRing3D')
+                % copy constructor
+                obj.Coords = zeros(size(var1.Coords));
+                obj.Coords(:) = var1.Coords(:);
+                
+            else
+                error('Unable to interpret input argument for creating LinearRing3D');
             end
-            obj.Coords = var1;
-
+            
         else
             obj.Coords = [];
         end
@@ -128,6 +149,24 @@ methods
         maxi = max(obj.Coords);
         box = Bounds3D([mini(1) maxi(1) mini(2) maxi(2) mini(3) maxi(3)]);
     end
+    
+    function varargout = fill(varargin)
+        % Paint the interior of this ring.
+        
+        % parse arguments using protected method implemented in Geometry
+        [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
+        
+        inds = [1:size(obj.Coords, 1) 1]; 
+        h = fill3(ax, obj.Coords(inds,1), obj.Coords(inds,2), obj.Coords(inds,3), varargin{:});
+        
+        if ~isempty(style)
+            apply(style, h);
+        end
+        
+        if nargout > 0
+            varargout = {h};
+        end
+     end
     
     function varargout = draw(varargin)
         % DRAW Draw the current geometry, eventually specifying the style.

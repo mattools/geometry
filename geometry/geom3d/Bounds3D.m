@@ -18,6 +18,42 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) Bounds3D < handle
 % Created: 2019-02-06,    using Matlab 8.6.0.267246 (R2015b)
 % Copyright 2019 INRA - BIA-BIBS.
 
+%% Static factories
+
+methods (Static)
+    function res = fromAxis(varargin)
+        % Create a Bounds3D from the current axis bounds.
+        %
+        % BNDS = Bounds3D.fromAxis;
+        % BNDS = Bounds3D.fromAxis(AX);
+        %
+        % Example:
+        %   % create 3D bounds for axis object of an empty figure
+        %   close all;
+        %   bounds = Bounds3D.fromAxis(gca)
+        %   bounds = 
+        %     Bounds3D with properties:
+        %       XMin: 0
+        %       XMax: 1
+        %       YMin: 0
+        %       YMax: 1
+        %       ZMin: 0
+        %       ZMax: 1
+        
+        if ~isempty(varargin)
+            hAx = varargin{1};
+        else
+            hAx = gca;
+        end
+        
+        % extract axis bounds to crop plane
+        xlim = get(hAx, 'xlim');
+        ylim = get(hAx, 'ylim');
+        zlim = get(hAx, 'zlim');
+        res = Bounds3D([xlim ylim zlim]);
+    end
+    
+end
 
 %% Properties
 properties
