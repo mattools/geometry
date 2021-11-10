@@ -57,6 +57,21 @@ seg2 = LineSegment3D(seg1);
 assertTrue(testCase, isa(seg2, 'LineSegment3D'));
 
 
+
+function test_planeIntersection_simple(testCase)
+
+p1 = Point3D(30, 20, -10);
+p2 = Point3D(30, 20, +10);
+seg = LineSegment3D(p1, p2);
+plane = Plane3D.XY;
+
+point = seg.planeIntersection(plane);
+
+assertEqual(testCase, 30, point.X);
+assertEqual(testCase, 20, point.Y);
+assertEqual(testCase,  0, point.Z);
+
+
 function test_draw_simple(testCase) %#ok<*DEFNU>
 % Test call of function without argument
 

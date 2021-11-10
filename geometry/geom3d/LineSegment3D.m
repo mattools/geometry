@@ -88,6 +88,67 @@ methods
 
 end % end constructors
 
+%% Geometry methods
+methods
+    function point = planeIntersection(obj, plane, varargin)
+        % Return intersection point between a plane and this line segment.
+        
+        % extract tolerance for determination of parallel edges and planes
+        tol = 1e-12;
+        if ~isempty(varargin)
+            tol = varargin{1};
+        end
+        
+        % initialize empty arrays
+        nEdges = numel(obj);
+        nPlanes = numel(plane);
+        
+        % initialize empty arrays
+        point(nEdges, nPlanes) = Point3D();
+        t = zeros(nPlanes, 1);
+        
+        % plane normal
+        n = normal(plane);
+        
+        % create line supporting edge
+        p1 = Point3D([obj.X1 obj.Y1 obj.Z1]);
+        p2 = Point3D([obj.X2 obj.Y2 obj.Z2]);
+        line = StraightLine3D(p1, p2);
+        
+        % get indices of edge and plane which are parallel
+        lineDir = direction(line);
+        par = abs(dotProduct(n, lineDir)) < tol;
+        if any(par)
+            point(par).X = NaN;
+            point(par).Y = NaN;
+            point(par).Z = NaN;
+            t(par) = NaN;
+        end
+        
+        % difference between origins of plane and edge
+        dp = Vector3D(p1, origin(plane));
+        
+        % relative position of intersection on line
+        %t = dot(n(~par,:), dp(~par,:), 2)./dot(n(~par,:), line(~par,4:6), 2);
+        t(~par) = dotProduct(n(~par), dp(~par)) ./ dotProduct(n(~par), lineDir(~par));
+        
+        % compute coord of intersection point
+        %point(~par, :) = line(~par,1:3) + repmat(t,1,3).*line(~par,4:6);
+        point(~par) = p1(~par) + lineDir(~par) * t(~par);
+        
+        % set points outside of edge to [NaN NaN NaN]
+        if any(t < 0)
+            point(t<0).X = NaN;
+            point(t<0).Y = NaN;
+            point(t<0).Z = NaN;
+        end
+        if any(t > 1)
+            point(t>1).X = NaN;
+            point(t>1).Y = NaN;
+            point(t>1).Z = NaN;
+        end
+    end
+end
 
 %% Methods generic to curve objects
 methods

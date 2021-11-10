@@ -72,10 +72,14 @@ methods
         % initialisation constructor with one argument
         if nargin == 1
             var1 = varargin{1};
-            if isnumeric(var1) && ~any(size(var1) ~= [1 3])
-                obj.X = var1(1);
-                obj.Y = var1(2);
-                obj.Z = var1(3);
+            if isnumeric(var1) && size(var1, 2) == 3
+                np = size(var1, 1);
+                obj = Point3D.empty(np, 0);
+                for ip = 1:np
+                    obj(ip).X = var1(ip,1);
+                    obj(ip).Y = var1(ip,2);
+                    obj(ip).Z = var1(ip,3);
+                end
             else
                 error('Can not parse input for Point3D');
             end

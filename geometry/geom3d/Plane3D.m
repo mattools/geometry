@@ -31,6 +31,21 @@ methods (Static)
         % create plane from point and normal
         plane = Plane3D(p0, n);
     end
+    
+    function plane = XY()
+        % The 3D plane through the origin, containing the Ox and Oy axes.
+        plane = Plane3D([0 0 0], [1 0 0], [0 1 0]);
+    end
+    
+    function plane = XZ()
+        % The 3D plane through the origin, containing the Ox and Oz axes.
+        plane = Plane3D([0 0 0], [1 0 0], [0 0 1]);
+    end
+    
+    function plane = YZ()
+        % The 3D plane through the origin, containing the Oy and Oz axes.
+        plane = Plane3D([0 0 0], [0 1 0], [0 0 1]);
+    end
 end
 
 
@@ -55,10 +70,11 @@ methods
             % Empty constructor
             
         elseif nargin == 2
-            if isa(varargin{1}, 'Point3D') && isa(varargin{2}, 'Vector3D')
-                % Build from position and normal vector
-                p0 = varargin{1};
-                n = normalize(varargin{2});
+            % Build from position and normal vector
+            p0 = varargin{1};
+            n = varargin{2};
+            if isa(p0, 'Point3D') && isa(n, 'Vector3D')
+                % arguments given as geometry instances
                 v0 = Vector3D([1 0 0]);
                 if norm(crossProduct(n, v0)) < 1e-12
                     v0 = Vector3D([0 1 0]);
@@ -72,7 +88,24 @@ methods
                 obj.Origin = [p0.X p0.Y p0.Z];
                 obj.Direction1 = [v1.X v1.Y v1.Z];
                 obj.Direction2 = [v2.X v2.Y v2.Z];
-
+                
+            elseif isnumeric(p0) && size(p0, 2) == 3 && isnumeric(n) && size(n, 2) == 3 
+                % arguments given as numeric row vectors
+                n = normalize(Vector3D(n));
+                v0 = Vector3D([1 0 0]);
+                if norm(crossProduct(n, v0)) < 1e-12
+                    v0 = Vector3D([0 1 0]);
+                end
+                
+                % create direction vectors
+                v1 = normalize(crossProduct(n, v0));
+                v2 = -normalize(crossProduct(v1, n));
+                
+                % store result in inner properties
+                obj.Origin = p0;
+                obj.Direction1 = [v1.X v1.Y v1.Z];
+                obj.Direction2 = [v2.X v2.Y v2.Z];
+                
             else
                 error('Wrong arguments');
             end
@@ -83,7 +116,29 @@ methods
             var2 = varargin{2};
             var3 = varargin{3};
             
-            if isa(var1, 'Point3D') && isa(var2, 'Point3D') && isa(var3, 'Point3D')
+            if isa(var1, 'Point3D') && isa(var2, 'Vector3D') && isa(var3, 'Vector3D')
+                % Create a plane from origin and two directions
+                p0 = var1;
+                v1 = var2;
+                v2 = var3;
+                
+                % store result in inner properties
+                obj.Origin = [p0.X p0.Y p0.Z];
+                obj.Direction1 = [v1.X v1.Y v1.Z];
+                obj.Direction2 = [v2.X v2.Y v2.Z];
+                
+            elseif isnumeric(var1) && size(var1, 2) == 3 && isnumeric(var2) && ...
+                    size(var2, 2) == 3 && isnumeric(var3) && size(var3, 2) == 3
+                % Create a plane from origin and two directions, given as
+                % numeric row vectors
+                
+                % store result in inner properties
+                obj.Origin = var1;
+                obj.Direction1 = var2;
+                obj.Direction2 = var3;
+                
+            elseif isa(var1, 'Point3D') && isa(var2, 'Point3D') && isa(var3, 'Point3D')
+                % Create the plane passing through three points
                 p0 = var1;
                 v1 = Vector3D(var1, var2);
                 v2 = Vector3D(var1, var3);
@@ -94,16 +149,9 @@ methods
                 obj.Direction2 = [v2.X v2.Y v2.Z];
                 obj = normalize(obj);
 
-            elseif isa(var1, 'Point3D') && isa(var2, 'Vector3D') && isa(var3, 'Vector3D')
-                p0 = var1;
-                v1 = var2;
-                v2 = var3;
-                
-                % store result in inner properties
-                obj.Origin = [p0.X p0.Y p0.Z];
-                obj.Direction1 = [v1.X v1.Y v1.Z];
-                obj.Direction2 = [v2.X v2.Y v2.Z];
-
+            else
+                error('Can not parse input arguments in plane creation');
+        
             end
             
         else
@@ -287,13 +335,26 @@ methods
         end
     end
     
+    function below = isBelow(obj, point)
+        % Test whether a point is below or above a plane.
+        %
+        % See also
+        %   normal
+        
+        
+        % compute position of point projected on 3D line corresponding to
+        % plane normal, and returns true for points locatd below the plane
+        % (pos<=0).
+        normalLine = StraightLine3D(origin(obj), normal(obj));
+        below = position(normalLine, point) <= 0;
+    end
 end % end methods
 
 
 %% Methods implementing the Geometry3D interface
 methods
     function bnd = bounds(obj) %#ok<MANU>
-        % Returns infinite bounds in each direction.
+        % Return infinite bounds in each direction.
         bnd = Bounds3D([-inf inf -inf inf -inf inf]);
     end
     
@@ -363,7 +424,7 @@ methods
     function res = translate(obj, varargin)
         % Return a translated version of this geometry.
         shift = varargin{1};
-        newOrigin = obj.Origin + shift;
+        newOrigin = obj.Origin + [shift.X shift.Y shift.Z];
         res = Plane3D(newOrigin, obj.Direction1, obj.Direction2);
     end    
 end % end methods
