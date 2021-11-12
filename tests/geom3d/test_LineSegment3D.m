@@ -57,6 +57,17 @@ seg2 = LineSegment3D(seg1);
 assertTrue(testCase, isa(seg2, 'LineSegment3D'));
 
 
+function test_Constructor_Point3DArray(testCase) %#ok<*DEFNU>
+% Create an array of line segment from tow arrays of points
+
+p1 = Point3D([0 0 0;30 20 10]);
+p2 = Point3D([10 10 10;60 40 20]);
+
+segArray = LineSegment3D(p1, p2);
+
+assertTrue(testCase, isa(segArray, 'LineSegment3D'));
+assertEqual(testCase, size(segArray), [2 1]);
+
 
 function test_planeIntersection_simple(testCase)
 

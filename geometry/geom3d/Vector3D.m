@@ -43,15 +43,25 @@ methods
             if isa(var1, 'Point3D') || isa(var1, 'Vector3D')
                 % copy constructor, or initialize from a point
                 var1 = varargin{1};
-                obj.X = var1.X;
-                obj.Y = var1.Y;
-                obj.Z = var1.Z;
+                n1 = size(var1, 1);
+                n2 = size(var1, 2);
+                obj(n1, n2) = Vector3D();
+                for i = 1:numel(var1)
+                    obj(i).X = var1(i).X;
+                    obj(i).Y = var1(i).Y;
+                    obj(i).Z = var1(i).Z;
+                end
                 
-            elseif isnumeric(var1) && ~any(size(var1) ~= [1 3])
+            elseif isnumeric(var1) && size(var1, 2) == 3
                 % Initialize from a 1-by-3 numeric array
-                obj.X = var1(1);
-                obj.Y = var1(2);
-                obj.Z = var1(3);
+                nv = size(var1, 1);
+                obj(nv, 1) = Vector3D();
+                for i = 1:nv
+                    obj(i).X = var1(i, 1);
+                    obj(i).Y = var1(i, 2);
+                    obj(i).Z = var1(i, 3);
+                end
+                
             else
                 error('Can not parse input for Vector3D');
             end
@@ -61,25 +71,44 @@ methods
             var2 = varargin{2};
             if isa(var1, 'Point3D') && isa(var2, 'Point3D')
                 % create vector as the difference between two points
-                obj.X = var2.X - var1.X;
-                obj.Y = var2.Y - var1.Y;
-                obj.Z = var2.Z - var1.Z;
+                if any(size(var1, 1) ~= size(var2, 1))
+                    error('Both inputs must have the same size');
+                end
+                
+                n1 = size(var1, 1);
+                n2 = size(var1, 2);
+                obj(n1, n2) = Vector3D();
+                for i = 1:numel(var1)
+                    obj(i).X = var2(i).X - var1(i).X;
+                    obj(i).Y = var2(i).Y - var1(i).Y;
+                    obj(i).Z = var2(i).Z - var1(i).Z;
+                end
             else
                 error('Can not parse input for Vector3D');
             end
             
         elseif nargin == 3
-            % initialisation from three scalar numeric argument
+            % initialisation from three numeric arguments
             for i = 1:3
                 var_i = varargin{i};
-                if ~isnumeric(var_i) || ~isscalar(var_i)
-                    error('Requires the three input argument to be numeric scalar values');
+                if ~isnumeric(var_i) || size(var_i, 2) ~= 1
+                    error('Requires the three input argument to be numeric with only one column');
                 end
             end
+            var1 = varargin{1};
+            var2 = varargin{2};
+            var3 = varargin{3};
+            if size(var1, 1) ~= size(var2, 1) || size(var1, 1) ~= size(var3, 1)
+                error('Requires the three inputs to have same number of rows');
+            end
             
-            obj.X = varargin{1};
-            obj.Y = varargin{2};
-            obj.Z = varargin{3};
+            nv = size(var1, 1);
+            obj(nv, 1) = Vector3D();
+            for i = 1:nv
+                obj(i).X = var1(i);
+                obj(i).Y = var2(i);
+                obj(i).Z = var3(i);
+            end
         else
             error('Wrong number of input arguments.');
         end
@@ -93,7 +122,9 @@ end % end constructors
 methods
     function p = dotProduct(v1, v2)
         % Dot product of two 3D vectors.
-        p = v1.X * v2.X + v1.Y * v2.Y + v1.Z * v2.Z;
+        p = reshape([v1.X], size(v1)) * reshape([v2.X], size(v2)) + ...
+            reshape([v1.Y], size(v1)) * reshape([v2.Y], size(v2)) + ...
+            reshape([v1.Z], size(v1)) * reshape([v2.Z], size(v2));
     end
     
     function res = crossProduct(vect1, vect2)
@@ -142,30 +173,46 @@ methods
     
 end % end methods
 
+
+%% Access methods
+methods
+    function coords = coordinates(obj)
+        % Get the coordinates of this vector as a numeric array.
+        coords = [[obj.X]' [obj.Y]' [obj.Z]'];
+    end
+    
+end
+
 %% Linear algebra methods for vectors
 methods
     function res = plus(obj, obj2)
         % Implement plus operator for Vector3D objects.
-        res = Vector3D(obj.X+obj2.X, obj.Y+obj2.Y, obj.Z+obj2.Z);
+        res = Vector3D(...
+            reshape([obj.X], size(obj)) + reshape([obj2.X], size(obj2)), ...
+            reshape([obj.Y], size(obj)) + reshape([obj2.Y], size(obj2)), ...
+            reshape([obj.Z], size(obj)) + reshape([obj2.Z], size(obj2)));
     end
     
     function res = minus(obj, obj2)
         % Implement minus operator for Vector3D objects.
-        res = Vector3D(obj.X-obj2.X, obj.Y-obj2.Y, obj.Z-obj2.Z);
+        res = Vector3D(...
+            reshape([obj.X], size(obj)) - reshape([obj2.X], size(obj2)), ...
+            reshape([obj.Y], size(obj)) - reshape([obj2.Y], size(obj2)), ...
+            reshape([obj.Z], size(obj)) - reshape([obj2.Z], size(obj2)));
     end
     
     function res = mtimes(obj, k)
         % Implement times operator for Vector3D objects.
-        res = Vector3D(obj.X * k, obj.Y * k, obj.Z * k);
+        res = reshape(Vector3D([[obj.X]' [obj.Y]' [obj.Z]'] .* k), size(obj));
     end
     
     function res = mrdivide(obj, k)
         % Implement divides operator for Vector3D objects.
-        res = Vector3D(obj.X / k, obj.Y / k, obj.Z / k);
+        res = reshape(Vector3D([[obj.X]' [obj.Y]' [obj.Z]'] ./ k), size(obj));
     end
     
     function res = uminus(obj)
-        res = Vector3D(-obj.X, -obj.Y, -obj.Z);
+        res = reshape(Vector3D(-[[obj.X]' [obj.Y]' [obj.Z]']), size(obj));
     end
 end
 

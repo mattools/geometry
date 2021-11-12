@@ -46,7 +46,7 @@ methods
                 obj.Origin    = var1.Origin;
                 obj.Direction = var1.Direction;
                 
-            elseif isnumeric(var1) && all(size(var1) == [1 4])
+            elseif isnumeric(var1) && all(size(var1) == [1 6])
                 % numeric input consider [X0 Y0 Z0 DX DY DZ].
                 obj.Origin    = [var1(1) var1(2) var1(3)];
                 obj.Direction = [var1(4) var1(5) var1(6)];
@@ -57,27 +57,63 @@ methods
         elseif nargin == 2
             % initialisation from two arguments
             
-            % parse origin
-            var1 = varargin{1};
-            if isa(var1, 'Point3D')
-                obj.Origin = [var1.X var1.Y var1.Z];
-            elseif isnumeric(var1)
-                obj.Origin = var1(1, 1:3);
-            else
-                error('Can not interpret first argument');
+            % Check both inputs have same size
+            p1 = varargin{1};
+            p2 = varargin{2};
+            if any(size(p1) ~= size(p2))
+                error('Both input arguments must have same size');
             end
             
-            % second argument can be either another point, or the direction
-            var2 = varargin{2};
-            if isa(var2, 'Point3D')
-                obj.Direction = [var2.X var2.Y var2.Z] - obj.Origin;
-            elseif isa(var2, 'Vector3D')
-                obj.Direction = [var2.X var2.Y var2.Z];
-            elseif isnumeric(var2)
-                % numeric input consider another point as default.
-                obj.Direction = var2 - obj.Origin;
+            if isa(p1, 'Point3D') && isa(p2, 'Point3D')
+                n1 = size(p1, 1);
+                n2 = size(p1, 2);
+                obj(n1, n2) = StraightLine3D();
+                for i = 1:numel(p1)
+                    obj(i).Origin = coordinates(p1(i));
+                    obj(i).Direction = coordinates(p2(i)) - obj(i).Origin;
+                end
+                
+            elseif isa(p1, 'Point3D') && isa(p2, 'Vector3D')
+                n1 = size(p1, 1);
+                n2 = size(p1, 2);
+                obj(n1, n2) = StraightLine3D();
+                for i = 1:numel(p1)
+                    obj(i).Origin = coordinates(p1(i));
+                    obj(i).Direction = coordinates(p2(i));
+                end
+                
+            elseif isnumeric(p1) && size(p1, 3) == 3 && isnumeric(p2) && size(p2, 3) == 3
+                % when  inputs are numeric, consider second one corresponds
+                % to another point  
+                n1 = size(p1, 1);
+                obj(n1, 1) = StraightLine3D();
+                for i = 1:numel(p1)
+                    obj(i).Origin = p1(i,:);
+                    obj(i).Direction = p1(2,:) - p1(i,:);
+                end
+                
+%             end
+%             % parse origin
+%             var1 = varargin{1};
+%             if isa(var1, 'Point3D')
+%                 obj.Origin = [var1.X var1.Y var1.Z];
+%             elseif isnumeric(var1)
+%                 obj.Origin = var1(1, 1:3);
+%             else
+%                 error('Can not interpret first argument');
+%             end
+            
+%             % second argument can be either another point, or the direction
+%             var2 = varargin{2};
+%             if isa(var2, 'Point3D')
+%                 obj.Direction = [var2.X var2.Y var2.Z] - obj.Origin;
+%             elseif isa(var2, 'Vector3D')
+%                 obj.Direction = [var2.X var2.Y var2.Z];
+%             elseif isnumeric(var2)
+%                 % numeric input consider another point as default.
+%                 obj.Direction = var2 - obj.Origin;
             else
-                error('Can not interpret second argument');
+                error('Can not interpret input arguments');
             end
             
         else
@@ -92,11 +128,15 @@ end % end constructors
 %% Information Methods
 methods
     function p = origin(obj)
-        p = Point3D(obj.Origin);
+        nl = numel(obj);
+        p = Point3D(reshape([obj.Origin], [3 nl])');
+        p = reshape(p, size(obj));
     end
     
     function v = direction(obj)
-        v = Vector3D(obj.Direction);
+        nl = numel(obj);
+        v = Vector3D(reshape([obj.Direction], [3 nl])');
+        v = reshape(v, size(obj));
     end
 end
 
@@ -164,26 +204,9 @@ methods
         
         % keep only valid points
         points = points(valid);
-%         ipZ0 = intersectLinePlane(line(i,:), planeZ0);
-%         ipZ1 = intersectLinePlane(line(i,:), planeZ1);
-%         ipY0 = intersectLinePlane(line(i,:), planeY0);
-%         ipY1 = intersectLinePlane(line(i,:), planeY1);
-%         ipX1 = intersectLinePlane(line(i,:), planeX1);
-%         ipX0 = intersectLinePlane(line(i,:), planeX0);
-
-%     % concatenate resulting points
-%     points  = [ipX0;ipX1;ipY0;ipY1;ipZ0;ipZ1];
-    
-        pos = position(obj, points);
-%     % compute position of each point on the line
-%     pos     = linePosition3d(points, line(i,:));
-
-%     % keep only defined points
-%     ind     = find(~isnan(pos));
-%     pos     = pos(ind);
-%     points  = points(ind,:);
-
+        
         % sort points with respect to their position
+        pos = position(obj, points);
         [pos, inds] = sort(pos); %#ok<ASGLU>
         points  = points(inds);
 
@@ -272,16 +295,16 @@ methods
         if ~isscalar(factor)
             error('Requires scaling factor to be a scalar');
         end
-        origin = obj.Origin * factor;
-        direction = obj.Direction * factor;
-        res = StraightLine3D(origin, direction);
+        origin2 = origin(obj) * factor;
+        direction2 = direction(obj) * factor;
+        res = StraightLine3D(origin2, direction2);
     end
     
     function res = translate(obj, varargin)
         % Return a translated version of this geometry.
         shift = varargin{1};
-        origin = obj.Origin + shift;
-        res = StraightLine3D(origin, obj.Direction);
+        origin2 = origin(obj) + shift;
+        res = StraightLine3D(origin2, direction(obj));
     end    
 end % end methods
 

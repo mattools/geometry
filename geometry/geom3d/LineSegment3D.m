@@ -61,26 +61,43 @@ methods
             obj.Z2 = var1.Z2;
             
         elseif nargin == 2
+            % Creation from two points, either as Point3D or as numeric
+            % arrays
+            
+            % check input validity
             p1 = varargin{1};
-            if isa(p1, 'Point3D')
-                obj.X1 = p1.X;
-                obj.Y1 = p1.Y;
-                obj.Z1 = p1.Z;
-            else
-                obj.X1 = p1(1);
-                obj.Y1 = p1(2);
-                obj.Z1 = p1(3);
-            end
-              
             p2 = varargin{2};
-            if isa(p2, 'Point3D')
-                obj.X2 = p2.X;
-                obj.Y2 = p2.Y;
-                obj.Z2 = p2.Z;
-            else
-                obj.X2 = p2(1);
-                obj.Y2 = p2(2);
-                obj.Z2 = p2(3);
+            if any(size(p1) ~= size(p2))
+                error('Both input arguments must have same size');
+            end
+                
+            if isa(p1, 'Point3D') && isa(p2, 'Point3D')
+                n1 = size(p1, 1);
+                n2 = size(p1, 2);
+                obj(n1, n2) = LineSegment3D();
+                for i = 1:n1
+                    for j = 1:n2
+                        obj(i,j).X1 = p1(i,j).X;
+                        obj(i,j).Y1 = p1(i,j).Y;
+                        obj(i,j).Z1 = p1(i,j).Z;
+                        obj(i,j).X2 = p2(i,j).X;
+                        obj(i,j).Y2 = p2(i,j).Y;
+                        obj(i,j).Z2 = p2(i,j).Z;
+                    end
+                end
+                
+            elseif isnumeric(p1) && size(p1, 2) == 3 && isnumeric(p2) && size(p2, 2) == 3
+                n1 = size(p1, 1);
+                obj(n1, 1) = LineSegment3D();
+                for i = 1:n1
+                        obj(i).X1 = p1(i, 1);
+                        obj(i).Y1 = p1(i, 2);
+                        obj(i).Z1 = p1(i, 3);
+                        obj(i).X2 = p2(i, 1);
+                        obj(i).Y2 = p2(i, 2);
+                        obj(i).Z2 = p2(i, 3);
+                end
+                
             end
         end
 
@@ -92,6 +109,10 @@ end % end constructors
 methods
     function point = planeIntersection(obj, plane, varargin)
         % Return intersection point between a plane and this line segment.
+        %
+        % INTERS = planeIntersection(LINESEG, PLANE);
+        %
+        % Support array of line segments.
         
         % extract tolerance for determination of parallel edges and planes
         tol = 1e-12;
@@ -102,21 +123,26 @@ methods
         % initialize empty arrays
         nEdges = numel(obj);
         nPlanes = numel(plane);
+        if nPlanes > 1
+            error('multiple planes not supported');
+        end
         
         % initialize empty arrays
         point(nEdges, nPlanes) = Point3D();
-        t = zeros(nPlanes, 1);
+        t = zeros(nEdges, 1);
         
         % plane normal
         n = normal(plane);
         
-        % create line supporting edge
-        p1 = Point3D([obj.X1 obj.Y1 obj.Z1]);
-        p2 = Point3D([obj.X2 obj.Y2 obj.Z2]);
-        line = StraightLine3D(p1, p2);
+        % origin and direction of edge supporting line
+        p1 = firstPoint(obj);
+        lineDir = Vector3D(p1, lastPoint(obj));
+        
+% %         p2 = reshape(Point3D([[obj.X2]' [obj.Y2]' [obj.Z2]']), size(obj));
+%         line = StraightLine3D(firstPoint(obj), lastPoint(obj));
+%         lineDir = direction(line);
         
         % get indices of edge and plane which are parallel
-        lineDir = direction(line);
         par = abs(dotProduct(n, lineDir)) < tol;
         if any(par)
             point(par).X = NaN;
@@ -126,11 +152,11 @@ methods
         end
         
         % difference between origins of plane and edge
-        dp = Vector3D(p1, origin(plane));
+        dp = Vector3D(p1, repmat(origin(plane), size(p1)));
         
         % relative position of intersection on line
         %t = dot(n(~par,:), dp(~par,:), 2)./dot(n(~par,:), line(~par,4:6), 2);
-        t(~par) = dotProduct(n(~par), dp(~par)) ./ dotProduct(n(~par), lineDir(~par));
+        t(~par) = dotProduct(n, dp(~par)) ./ dotProduct(n, lineDir(~par));
         
         % compute coord of intersection point
         %point(~par, :) = line(~par,1:3) + repmat(t,1,3).*line(~par,4:6);
@@ -153,22 +179,23 @@ end
 %% Methods generic to curve objects
 methods
     function l = length(obj)
-        dx = obj.X2 - obj.X1;
-        dy = obj.Y2 - obj.Y1;
-        dz = obj.Z2 - obj.Z1;
-        l = sqrt(dx*dx + dy*dy + dz*dz);
+        dx = [obj.X2] - [obj.X1];
+        dy = [obj.Y2] - [obj.Y1];
+        dz = [obj.Z2] - [obj.Z1];
+        l = sqrt(dx.*dx + dy.*dy + dz.*dz);
+        l = reshape(l, size(obj));
     end
     
     function res = reverse(obj)
-        res = LineSegment3D([obj.X2 obj.Y2 obj.Z2], [obj.X1 obj.Y1 obj.Z1]);
+        res = LineSegment3D(lastPoint(obj), firstPoint(obj));
     end
     
     function p1 = firstPoint(obj)
-        p1 = Point3D(obj.X1, obj.Y1, obj.Z1);
+        p1 = reshape(Point3D([[obj.X1]' [obj.Y1]' [obj.Z1]']), size(obj));
     end
     
     function p2 = lastPoint(obj)
-        p2 = Point3D(obj.X2, obj.Y2, obj.Z2);
+        p2 = reshape(Point3D([[obj.X2]' [obj.Y2]' [obj.Z2]']), size(obj));
     end
 end
 

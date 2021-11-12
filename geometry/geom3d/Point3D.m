@@ -63,9 +63,14 @@ methods
         % copy constructor
         if isa(varargin{1}, 'Point3D')
             that = varargin{1};
-            obj.X = that.X;
-            obj.Y = that.Y;
-            obj.Z = that.Z;
+            n1 = size(that, 1);
+            n2 = size(that, 2);
+            obj(n1, n2) = Point3D();
+            for i = 1:numel(that)
+                obj(i).X = that(i).X;
+                obj(i).Y = that(i).Y;
+                obj(i).Z = that(i).Z;
+            end
             return;
         end
         
@@ -74,7 +79,7 @@ methods
             var1 = varargin{1};
             if isnumeric(var1) && size(var1, 2) == 3
                 np = size(var1, 1);
-                obj = Point3D.empty(np, 0);
+                obj(np, 1) = Point3D();
                 for ip = 1:np
                     obj(ip).X = var1(ip,1);
                     obj(ip).Y = var1(ip,2);
@@ -85,15 +90,23 @@ methods
             end
         end
         
-        % initialisation from three scalar numeric arguments
+        % initialisation from three numeric arguments
         if nargin == 3
             var1 = varargin{1};
             var2 = varargin{2};
             var3 = varargin{3};
-            if isnumeric(var1) && isnumeric(var2) && isnumeric(var3) && isscalar(var1) && isscalar(var2) && isscalar(var3)
-                obj.X = var1;
-                obj.Y = var2;
-                obj.Z = var3;
+            if isnumeric(var1) && isnumeric(var2) && isnumeric(var3)
+                if any(size(var1) ~= size(var2)) || any(size(var1) ~= size(var3)) 
+                    error('the three inputs must have the same size');
+                end
+                n1 = size(var1, 1);
+                n2 = size(var1, 2);
+                obj(n1, n2) = Point3D();
+                for i = 1:numel(var1)
+                    obj(i).X = var1(i);
+                    obj(i).Y = var2(i);
+                    obj(i).Z = var3(i);
+                end
             else
                 error('Can not parse inputs for Point3D');
             end
@@ -102,6 +115,7 @@ methods
 
 end % end constructors
 
+
 %% Methods specific to Point3D
 methods
     function res = plus(obj, obj2)
@@ -109,10 +123,24 @@ methods
         if ~isa(obj2, 'Vector3D')
             error('Requires second argument to be a Vector3D');
         end
-        res = Point3D(obj.X+obj2.X, obj.Y+obj2.Y, obj.Z+obj2.Z);
+        res = Point3D(...
+            reshape([obj.X], size(obj)) + reshape([obj2.X], size(obj2)), ...
+            reshape([obj.Y], size(obj)) + reshape([obj2.Y], size(obj2)), ...
+            reshape([obj.Z], size(obj)) + reshape([obj2.Z], size(obj2)));
     end
 
 end
+
+
+%% Access methods
+methods
+    function coords = coordinates(obj)
+        % Get the coordinates of this point as a numeric array.
+        coords = [[obj.X]' [obj.Y]' [obj.Z]'];
+    end
+    
+end
+
 
 %% Methods implementing the Geometry3D interface
 methods
@@ -133,7 +161,7 @@ methods
         [ax, obj, style, varargin] = parseDrawInputArguments(varargin{:});
         
         % draw the geometric primitive
-        hh = plot3(ax, obj.X, obj.Y, obj.Z, varargin{:});
+        hh = plot3(ax, [obj.X], [obj.Y], [obj.Z], varargin{:});
 
         % optionnally add style processing
         if ~isempty(style)
@@ -152,13 +180,13 @@ methods
     function res = scale(obj, varargin)
         % Return a scaled version of this geometry.
         factor = varargin{1};
-        res = Point3D([obj.X obj.Y obj.Z] * factor);
+        res = reshape(Point3D([[obj.X]' [obj.Y]' [obj.Z]'] * factor), size(obj));
     end
     
     function res = translate(obj, varargin)
         % Return a translated version of this geometry.
         shift = varargin{1};
-        res = Point3D(bsxfun(@plus, [obj.X obj.Y obj.Z], shift));
+        res = reshape(Point3D([[obj.X]' [obj.Y]' [obj.Z]'] + shift), size(obj));
     end    
 end % end methods
 
