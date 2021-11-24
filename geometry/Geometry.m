@@ -27,6 +27,24 @@ end % end constructors
 
 
 %% Protected methods for general use
+methods (Static = true, Access = protected)
+    function [dim, nd] = computeOutputArraySize(dim1, dim2)
+        % Compute size of output array from size of inputs.
+        nd1 = length(dim1);
+        nd2 = length(dim2);
+        nd = max(nd1, nd2);
+        dim = ones(1, nd);
+        dim(1:nd1) = dim1;
+        dim(1:nd2) = max(dim(1:nd2), dim2);
+    end
+    
+    function ind = linearIndex(dim, inds)
+        nd = length(dim);
+        tmp = num2cell(min(inds(1:nd), dim));
+        ind = sub2ind(dim, tmp{:});
+    end
+end
+
 methods (Access = protected)
     function [ax, obj, style, varargin] = parseDrawInputArguments(varargin)
         % Return the different elements necessary to draw the object.

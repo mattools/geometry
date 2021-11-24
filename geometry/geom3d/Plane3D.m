@@ -24,12 +24,25 @@ methods (Static)
         %
         % PLANE = Plane3D.medianPlane(PT1, PT2);
         
-        % middle point
-        p0 = Point3D.centroid(p1, p2);
-        % normal to plane
-        n = normalize(Vector3D(p1, p2));
-        % create plane from point and normal
-        plane = Plane3D(p0, n);
+        % create result array
+        dim = max(size(p1), size(p2));
+        plane(dim(1), dim(2)) = Plane3D;
+        
+        % iterate over pairs of inputs
+        for i = 1:dim(1)
+            for j = 1:dim(2)
+                % retrieve points for current plane
+                p1r = p1(min(i, size(p1, 1)), min(j, size(p1, 2)));
+                p2r = p2(min(i, size(p2, 1)), min(j, size(p2, 2)));
+                
+                % middle point
+                p0 = Point3D.centroid(p1r, p2r);
+                % normal to plane
+                n = normalize(Vector3D(p1r, p2r));
+                % create plane from point and normal
+                plane(i,j) = Plane3D(p0, n);
+            end
+        end
     end
     
     function plane = XY()
@@ -122,10 +135,30 @@ methods
                 v1 = var2;
                 v2 = var3;
                 
-                % store result in inner properties
-                obj.Origin = [p0.X p0.Y p0.Z];
-                obj.Direction1 = [v1.X v1.Y v1.Z];
-                obj.Direction2 = [v2.X v2.Y v2.Z];
+                dim1 = size(p0);
+                dim2 = size(v1);
+                dim3 = size(v2);
+                dim = max([dim1 ; dim2 ; dim3]);
+                nd = length(dim);
+                
+                obj(prod(dim)) = Plane3D;
+                obj = reshape(obj, dim);
+                
+                for i = 1:prod(dim)
+                    % convert linear index of output to sub indices
+                    inds = cell(nd,1);
+                    [inds{:}] = ind2sub(dim, i);
+                    inds = [inds{:}];
+                    % convert sub indices to linear index of inputs
+                    tmp = num2cell(min(inds, dim1)); ind1 = sub2ind(dim1, tmp{:});
+                    tmp = num2cell(min(inds, dim2)); ind2 = sub2ind(dim2, tmp{:});
+                    tmp = num2cell(min(inds, dim3)); ind3 = sub2ind(dim3, tmp{:});
+                    
+                    % store result in inner properties
+                    obj(i).Origin = coordinates(p0(ind1));
+                    obj(i).Direction1 = coordinates(v1(ind2));
+                    obj(i).Direction2 = coordinates(v2(ind3));
+                end
                 
             elseif isnumeric(var1) && size(var1, 2) == 3 && isnumeric(var2) && ...
                     size(var2, 2) == 3 && isnumeric(var3) && size(var3, 2) == 3
@@ -167,17 +200,17 @@ end % end constructors
 methods
     function o = origin(obj)
         % Return the origin point of this plane.
-        o = Point3D(obj.Origin);
+        o = Point3D(vertcat(obj.Origin));
     end
     
     function v1 = direction1(obj)
         % Return the first direction vector of this plane.
-        v1 = Vector3D(obj.Direction1);
+        v1 = Vector3D(vertcat(obj.Direction1));
     end
     
     function v2 = direction2(obj)
         % Return the second direction vector of this plane.
-        v2 = Vector3D(obj.Direction2);
+        v2 = Vector3D(vertcat(obj.Direction2));
     end
     
     function n = normal(obj)
@@ -185,7 +218,7 @@ methods
         %
         % The normal of the plane is equal to the cross product of the two
         % direction vectors.
-        n = crossProduct(Vector3D(obj.Direction1), Vector3D(obj.Direction2));
+        n = crossProduct(direction1(obj), direction2(obj));
     end
     
     function res = normalize(obj)
@@ -201,7 +234,7 @@ methods
         %
         
         % compute first direction vector
-        d1  = normalize(Vector3D(obj.Direction1));
+        d1  = normalize(direction1(obj));
         
         % compute second direction vector
         n   = normalize(normal(obj));
@@ -282,6 +315,50 @@ methods
         poly = LinearRing3D(points);
     end
     
+    function line = intersectPlane(plane1, plane2, varargin)
+        % Intersection line between 2 planes in space.
+        %
+        % LINE = intersectPlane(PLANE1, PLANE2);
+        
+         
+        tol = 1e-14;
+        if ~isempty(varargin)
+            tol = varargin{1};
+        end
+        
+        % allocate memory for result
+        dim = max(size(plane1), size(plane2));
+        line(prod(dim)) = StraightLine3D();
+        line = reshape(line, dim);
+        
+        % plane normal
+        n1 = normalize(normal(plane1));
+        n2 = normalize(normal(plane2));
+        
+        valid = norm(crossProduct(n1, n2)) > tol;
+        
+        % Uses Hessian form, ie : N.p = d
+        % I this case, d can be found as : -N.p0, when N is normalized
+        d1 = dotProduct(n1(valid), Vector3D(origin(plane1(valid))));
+        d2 = dotProduct(n2(valid), Vector3D(origin(plane2(valid))));
+        
+        % compute dot products between plane normals
+        dot1 = dotProduct(n1(valid), n1(valid));
+        dot2 = dotProduct(n2(valid), n2(valid));
+        dot12 = dotProduct(n1(valid), n2(valid));
+        
+        % intermediate computations
+        det = dot1 .* dot2 - dot12 .* dot12;
+        c1  = (d1 .* dot2 - d2 .* dot12) ./ det;
+        c2  = (d2 .* dot1 - d1 .* dot12) ./ det;
+        
+        % compute line origin and direction
+        p0  = Point3D(c1*n1(valid) + c2*n2(valid));
+        dp  = crossProduct(n1(valid), n2(valid));
+        
+        line(valid) = StraightLine3D(p0, dp);
+    end
+    
     function [point, valid] = intersectLine(obj, line, varargin)
         % Intersection point of the plane with the given line.
         %
@@ -332,6 +409,41 @@ methods
                     point(iPlane, iLine) = Point3D([NaN NaN NaN]);
                 end
             end
+        end
+    end
+    
+    function proj = projection(obj, point)
+        % Return the orthogonal projection of a point on a plane.
+        
+        % retrieve origin(s) and normal(s) of current plane(s)
+        origins = origin(obj);
+        normals = normal(obj);
+        
+        % difference between origins of plane and point
+        dp = Vector3D(origins, point);
+        
+        % relative position of point on normal's line
+        t = dotProduct(normals, dp) ./ dotProduct(normals, normals);      
+        
+        % project point back to plane
+        proj = translate(point, - normals * t);
+    end
+    
+    function pos = position(plane, point)
+        % Compute position of a point on a plane.
+        
+        % origin and direction vectors of the plane
+        p0 = origin(plane);
+        d1 = direction1(plane);
+        d2 = direction2(plane);
+        
+        dp = Vector3D(p0, point);
+        s = dotProduct(dp, d1) ./ norm(d1);
+        t = dotProduct(dp, d2) ./ norm(d2);
+        
+        pos = cat(ndims(s)+1, s, t);
+        if ismatrix(s) && size(s, 2) == 1
+            pos = squeeze(pos)';
         end
     end
     

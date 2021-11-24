@@ -71,17 +71,31 @@ methods
             var2 = varargin{2};
             if isa(var1, 'Point3D') && isa(var2, 'Point3D')
                 % create vector as the difference between two points
-                if any(size(var1, 1) ~= size(var2, 1))
-                    error('Both inputs must have the same size');
-                end
                 
-                n1 = size(var1, 1);
-                n2 = size(var1, 2);
-                obj(n1, n2) = Vector3D();
-                for i = 1:numel(var1)
-                    obj(i).X = var2(i).X - var1(i).X;
-                    obj(i).Y = var2(i).Y - var1(i).Y;
-                    obj(i).Z = var2(i).Z - var1(i).Z;
+                % compute size of output array
+                dim1 = size(var1);
+                dim2 = size(var2);
+                [dim, nd] = computeOutputArraySize(dim1, dim2);
+                
+                % create output array
+                obj(prod(dim)) = Vector3D();
+                obj = reshape(obj, dim);
+                
+                % process each item in output array
+                for i = 1:prod(dim)
+                    % convert linear index of output to sub indices
+                    inds = cell(nd,1);
+                    [inds{:}] = ind2sub(dim, i);
+                    inds = [inds{:}];
+                    
+                    % convert sub indices to linear index of inputs
+                    ind1 = linearIndex(dim1, inds);
+                    ind2 = linearIndex(dim2, inds);
+                    
+                    % store result in inner properties
+                    obj(i).X = var2(ind2).X - var1(ind1).X;
+                    obj(i).Y = var2(ind2).Y - var1(ind1).Y;
+                    obj(i).Z = var2(ind2).Z - var1(ind1).Z;
                 end
             else
                 error('Can not parse input for Vector3D');
@@ -122,9 +136,9 @@ end % end constructors
 methods
     function p = dotProduct(v1, v2)
         % Dot product of two 3D vectors.
-        p = reshape([v1.X], size(v1)) * reshape([v2.X], size(v2)) + ...
-            reshape([v1.Y], size(v1)) * reshape([v2.Y], size(v2)) + ...
-            reshape([v1.Z], size(v1)) * reshape([v2.Z], size(v2));
+        p = reshape([v1.X], size(v1)) .* reshape([v2.X], size(v2)) + ...
+            reshape([v1.Y], size(v1)) .* reshape([v2.Y], size(v2)) + ...
+            reshape([v1.Z], size(v1)) .* reshape([v2.Z], size(v2));
     end
     
     function res = crossProduct(vect1, vect2)
@@ -140,10 +154,10 @@ methods
         %       Y: 0
         %       Z: 6
 
-        v1 = [vect1.X vect1.Y vect1.Z];
-        v2 = [vect2.X vect2.Y vect2.Z];
-        v = v1([2 3 1]) .* v2([3 1 2]) - v2([2 3 1]) .* v1([3 1 2]);
-        res = Vector3D(v);
+        v1 = [vertcat(vect1.X) vertcat(vect1.Y) vertcat(vect1.Z)];
+        v2 = [vertcat(vect2.X) vertcat(vect2.Y) vertcat(vect2.Z)];
+        v = v1(:, [2 3 1]) .* v2(:, [3 1 2]) - v2(:, [2 3 1]) .* v1(:, [3 1 2]);
+        res = reshape(Vector3D(v), size(vect1));
     end
     
     function n = norm(obj)
@@ -154,7 +168,7 @@ methods
         %   norm(v)
         %   ans = 
         %       5
-        n = hypot(hypot(obj.X, obj.Y), obj.Z);
+        n = reshape(hypot(hypot([obj.X]', [obj.Y]'), [obj.Z]'), size(obj));
     end
     
     function vn = normalize(obj)
@@ -167,8 +181,11 @@ methods
         %   ans = 
         %       1
         
-        n = hypot(hypot(obj.X, obj.Y), obj.Z);
-        vn = Vector3D(obj.X / n, obj.Y / n, obj.Z / n);
+        vx = reshape(vertcat(obj.X), size(obj));
+        vy = reshape(vertcat(obj.Y), size(obj));
+        vz = reshape(vertcat(obj.Z), size(obj));
+        n = hypot(hypot(vx, vy), vz);
+        vn = Vector3D(vx ./ n, vy ./ n, vz ./ n);
     end
     
 end % end methods
@@ -203,6 +220,12 @@ methods
     
     function res = mtimes(obj, k)
         % Implement times operator for Vector3D objects.
+        
+        if isa(k, 'Vector3D') && isnumeric(obj)
+            % swap inputs
+            tmp = k; k = obj; obj = tmp;
+        end
+        
         res = reshape(Vector3D([[obj.X]' [obj.Y]' [obj.Z]'] .* k), size(obj));
     end
     
@@ -233,3 +256,21 @@ end
 
 end % end classdef
 
+
+%% Utility functions
+
+function [dim, nd] = computeOutputArraySize(dim1, dim2)
+% Compute size of output array from size of inputs.
+nd1 = length(dim1);
+nd2 = length(dim2);
+nd = max(nd1, nd2);
+dim = ones(1, nd);
+dim(1:nd1) = dim1;
+dim(1:nd2) = max(dim(1:nd2), dim2);
+end
+
+function ind = linearIndex(dim, inds)
+nd = length(dim);
+tmp = num2cell(min(inds(1:nd), dim));
+ind = sub2ind(dim, tmp{:});
+end

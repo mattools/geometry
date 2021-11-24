@@ -39,6 +39,37 @@ assertEqual(testCase, res.Y, 12);
 assertEqual(testCase, res.Z, 13);
 
 
+function test_distance(testCase) %#ok<*DEFNU>
+
+p1 = Point3D([10 10 10]);
+p2 = Point3D([12 13 16]);
+
+d = distance(p1, p2);
+
+assertEqual(testCase, d, 7.0, 'AbsTol', 0.01);
+
+
+function test_distance_p2Array(testCase) %#ok<*DEFNU>
+
+p1 = Point3D([10 10 10]);
+p2 = Point3D([12 13 16;10 10 10;20 20 20]);
+
+d = distance(p1, p2);
+
+assertEqual(testCase, size(d), [3 1]);
+assertEqual(testCase, d, [7.0 ; 0.0; sqrt(300)], 'AbsTol', 0.01);
+
+
+function test_distance_p1p2Array(testCase) %#ok<*DEFNU>
+
+p1 = Point3D([10 10 10;0 0 0]);
+p2 = Point3D([12 13 16;10 10 10;20 20 20])';
+
+d = distance(p1, p2);
+
+assertEqual(testCase, size(d), [2 3]);
+
+
 function test_Serialize(testCase)
 % Test call of function without argument
 

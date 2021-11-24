@@ -15,6 +15,35 @@ classdef Sphere3D < Geometry3D
 % Created: 2020-03-06,    using Matlab 8.6.0.267246 (R2015b)
 % Copyright 2020 INRAE - BIA-BIBS.
 
+%% Static methods
+methods (Static)
+    function alpha = sphericalAngle(p1, p2, p3)
+        % Compute angle between points on the sphere.
+        %
+        %   ALPHA = sphericalAngle(P1, P2, P3)
+        %   Computes angle (P1, P2, P3), i.e. the angle, measured at point P2,
+        %   between the direction (P2, P1) and the direction (P2, P3).
+        %   The result is given in radians, between 0 and 2*PI.
+        %
+        
+        % convert points to (normalized) vectors
+        p1 = Point3D(normalize(Vector3D(p1)));
+        p2 = Point3D(normalize(Vector3D(p2)));
+        p3 = Point3D(normalize(Vector3D(p3)));
+        
+        % create the plane tangent to the unit sphere and containing central point
+        plane = Plane3D(p2, Vector3D(p2));
+        
+        % project the two other points on the plane
+        pp1 = position(plane, projection(plane, p1));
+        pp3 = position(plane, projection(plane, p3));
+        
+        % compute angle on the tangent plane
+        pp2 = zeros(max(size(pp1, 1), size(pp3,1)), 2);
+        alpha = angle3Points(pp1, pp2, pp3);
+    end
+end
+
 
 %% Properties
 properties
@@ -67,6 +96,98 @@ methods
 end % end constructors
 
 
+%% Methods specific to Sphere3D
+methods
+    function s = surfaceArea(obj)
+        s = reshape([obj.Radius], size(obj)) .^4 * 4 * pi;
+    end
+    
+    function [point, valid] = intersectLine(obj, lines, varargin)
+        % Intersection points between a line and a sphere.
+        
+        % check if user-defined tolerance is given
+        tol = 1e-14;
+        if ~isempty(varargin)
+            tol = varargin{1};
+        end
+        
+        dim1 = size(obj);
+        dim2 = size(lines);
+        dim = max(dim1, dim2);
+        nd = length(dim);
+        
+        % allocate memory for output
+        dims2 = [dim 2];
+        point(prod(dims2)) = Point3D;
+        point = reshape(point, dims2);
+        valid = true(dim);
+        
+        % iterate over the pairs of inputs
+        for i = 1:prod(dim)
+            % convert linear index of output to sub indices
+            inds = cell(nd,1);
+            [inds{:}] = ind2sub(dim, i);
+%             inds = [inds{:}];
+            
+            % convert sub indices to linear index of inputs
+            tmp = num2cell(min([inds{:}], dim1)); ind1 = sub2ind(dim1, tmp{:});
+            tmp = num2cell(min([inds{:}], dim2)); ind2 = sub2ind(dim2, tmp{:});
+            
+            sphere = obj(ind1);
+            line = lines(ind2);
+            
+            % difference between centers
+            dc = Vector3D(line.origin(), Point3D(sphere.Center));
+            
+            % equation coefficients
+            dl = line.direction();
+            a = dotProduct(dl, dl);
+            b = 2 * dotProduct(dc, dl);
+            c = dotProduct(dc, dc) - sphere.Radius^2;
+            
+            % solve equation
+            delta = b.*b - 4*a.*c;
+            
+            if delta > tol
+                % process couples with two intersection points
+                
+                % delta positive: find two roots of second order equation
+                u1 = (-b -sqrt(delta)) / 2 / a;
+                u2 = (-b +sqrt(delta)) / 2 / a;
+                
+                % convert into 3D coordinate
+                origin = coordinates(line.origin());
+                point1 = Point3D(origin + coordinates(dl * u1));
+                point2 = Point3D(origin + coordinates(dl * u2));
+                
+                % convert to linear indices in result array
+                inds2 = [inds ; {1}]; indR1 = sub2ind(dims2, inds2{:});
+                point(indR1) = point1;
+                inds2 = [inds ; {2}]; indR2 = sub2ind(dims2, inds2{:});
+                point(indR2) = point2;
+                
+            elseif abs(delta) <= tol
+                % process couples with one intersection point
+                
+                % delta around zero: find unique root, and convert to 3D coord.
+                u = -b / 2 / a;
+                point = Point3D(coordinates(origin(line)) + coordinates(dl * u));
+                
+                inds2 = [inds ; {1}]; indR1 = sub2ind(dims2, inds2{:});
+                inds2 = [inds ; {2}]; indR2 = sub2ind(dims2, inds2{:});
+                point([indR1 indR2]) = [point point];
+
+            else
+                valid(i) = false;
+            end
+        end
+        
+        if nd == 2 && dim(2) == 1
+            point = squeeze(point)';
+        end
+    end
+end
+
 
 %% Methods implementing the Geometry3D interface
 methods
@@ -105,7 +226,7 @@ methods
         
         % compute spherical coordinates
         theta   = linspace(0, pi, nTheta+1);
-        phi     = linspace(0, 2*pi, nPhi+1);
+        phi     = linspace(-pi, +pi, nPhi+1);
         
         % convert to cartesian coordinates
         sintheta = sin(theta);

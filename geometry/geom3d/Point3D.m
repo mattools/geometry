@@ -60,8 +60,8 @@ methods
             return;
         end
         
-        % copy constructor
-        if isa(varargin{1}, 'Point3D')
+        % copy constructor, or conversion from a Vector3D instance
+        if isa(varargin{1}, 'Point3D') || isa(varargin{1}, 'Vector3D')
             that = varargin{1};
             n1 = size(that, 1);
             n2 = size(that, 2);
@@ -144,6 +144,21 @@ end
 
 %% Methods implementing the Geometry3D interface
 methods
+    function d = distance(p1, p2)
+        % Distance between two points.
+        %
+        %   D = distance(P1, P2);
+        
+        dim1 = size(p1);
+        dim2 = size(p2);
+        
+        dp = (reshape([p1.X], dim1) - reshape([p2.X], dim2)) .^ 2;
+        dp = dp + (reshape([p1.Y], dim1) - reshape([p2.Y], dim2)) .^ 2;
+        dp = dp + (reshape([p1.Z], dim1) - reshape([p2.Z], dim2)) .^ 2;
+               
+        d = sqrt(dp);
+    end
+    
     function res = transform(obj, transform)
         % Apply a geometric transform to this geometry.
         res = Point3D(transformPoint(transform, [obj.X obj.Y obj.Z]));
@@ -186,6 +201,9 @@ methods
     function res = translate(obj, varargin)
         % Return a translated version of this geometry.
         shift = varargin{1};
+        if isa(shift, 'Vector3D')
+            shift = coordinates(shift);
+        end
         res = reshape(Point3D([[obj.X]' [obj.Y]' [obj.Z]'] + shift), size(obj));
     end    
 end % end methods

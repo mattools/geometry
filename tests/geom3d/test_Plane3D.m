@@ -97,3 +97,23 @@ assertTrue(testCase, ismember([5 10  0], poly.Coords, 'rows'));
 assertTrue(testCase, ismember([5  0 10], poly.Coords, 'rows'));
 assertTrue(testCase, ismember([5 10 10], poly.Coords, 'rows'));
 
+
+function test_intersectPlane_XYvsYZ(testCase) %#ok<*DEFNU>
+
+Oxy = Plane3D.XY;
+Oyz = Plane3D.YZ;
+lineOy = intersectPlane(Oxy, Oyz);
+
+assertEqual(testCase, distance(origin(lineOy), Point3D([0 0 0])), 0, 'AbsTol', 0.01);
+
+
+function test_projection_XY(testCase)
+
+planeXY = Plane3D.XY;
+point = Point3D([5 4 3]);
+
+proj = planeXY.projection(point);
+
+exp = Point3D([5 4 0]);
+assertEqual(testCase, distance(proj, exp), 0.0, 'AbsTol', 0.01);
+
