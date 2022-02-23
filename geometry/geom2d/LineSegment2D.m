@@ -14,7 +14,7 @@ classdef (InferiorClasses = {?matlab.graphics.axis.Axes}) LineSegment2D < Curve2
 %     draw(L);
 %
 %   See also
-%     Point2D
+%     Point2D, StraightLine2D
 %
 
 % ------
@@ -201,7 +201,7 @@ methods
     
     function res = translate(obj, shift)
         % Returns a translated version of this line segment.
-        res = LineSegment3D(obj.P1 + shift, obj.P2 + shift);
+        res = LineSegment2D(obj.P1 + shift, obj.P2 + shift);
     end
     
     function res = rotate(obj, varargin)
@@ -211,7 +211,7 @@ methods
             origin = varargin{1};
         end
         
-        rot = createRotation(origin, deg2rad(angle));
+        rot = AffineTransform2D.createRotation(origin, deg2rad(angle));
         p1t = transformPoint(rot, obj.P1);
         p2t = transformPoint(rot, obj.P2);
         

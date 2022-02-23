@@ -61,7 +61,7 @@ methods
     function verts = vertices(obj)
         % Return vertices as a new instance of MultiPoint2D.
         coords = [obj.X(:) obj.Y(:)];
-        verts = MultiPoint3D(coords);
+        verts = MultiPoint2D(coords);
     end
     
     function drawSubGrid(varargin)
