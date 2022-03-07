@@ -240,12 +240,16 @@ methods
     
     function res = scale(obj, factor)
         % Returns a scaled version of this geometry.
-        res = LineSegment3D([obj.X1 obj.Y1 obj.Z2] * factor, [obj.X2 obj.Y2 obj.ZZ] * factor);
+        coords1 = [obj.X1 obj.Y1 obj.Z1] * factor;
+        coords2 = [obj.X2 obj.Y2 obj.Z2] * factor;
+        res = LineSegment3D(coords1, coords2);
     end
    
     function res = translate(obj, shift)
-        % Returns a translated version of this geometry.       
-        res = LineSegment3D([obj.X1 obj.Y1 obj.Z2] + shift, [obj.X2 obj.Y2 obj.ZZ] + shift);
+        % Returns a translated version of this geometry.
+        coords1 = [obj.X1 obj.Y1 obj.Z1] + shift;
+        coords2 = [obj.X2 obj.Y2 obj.Z2] + shift;
+        res = LineSegment3D(coords1, coords2);
     end
     
 end % end methods
